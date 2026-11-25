@@ -41,12 +41,29 @@ const EXCLUDED_KEYWORDS = [
   'caixa vazia',
   'apenas caixa',
   'aluguel',
+  // Versões importadas / mercado cinza sem garantia Sony Brasil e sem avaliações:
+  'uae version',
+  'middle east version',
+  'international version',
+  'japan version',
+  'jp version',
+  'uk version',
+  'eu version',
+  'us version',
+  'asian version',
+  'versao importada',
+  'versão importada',
+  '1 year manufacturer warranty',
+  'bundle gta vi',
+  'bundle marvel',
+  'wolverine +',
 ];
 
 const CONSOLE_REQUIRED_KEYWORDS = [
   'ps5',
   'playstation 5',
   'play 5',
+  'playstation®5',
 ];
 
 const DIGITAL_KEYWORDS = [
@@ -66,6 +83,8 @@ const DIGITAL_KEYWORDS = [
 const DISC_KEYWORDS = [
   'com leitor',
   'com disco',
+  'slim disk',
+  'slim disc',
   'edicao padrao',
   'edição padrão',
   'standard',
@@ -125,18 +144,16 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
     return { isValidConsole: false, edition: 'unknown', reason: 'Não menciona PS5 / PlayStation 5' };
   }
 
-  // Verificar palavras de exclusão (acessórios, jogos avulsos, apenas leitor, etc.)
-  // Cuidado: "Console PS5 + Controle DualSense" é válido, mas "Controle DualSense PS5" não.
-  const startsWithAccessory = /^(controle|jogo|game|tampa|capa|suporte|headset|base|leitor de disco|unidade de disco|cabo|cooler|skin|adesivo)\b/i.test(
-    norm.trim()
-  );
+  const startsWithAccessory =
+    /^(controle|jogo|game|tampa|capa|suporte|headset|base|leitor de disco|unidade de disco|cabo|cooler|skin|adesivo)\b/i.test(
+      norm.trim()
+    );
   if (startsWithAccessory) {
     return { isValidConsole: false, edition: 'unknown', reason: 'Inicia com nome de acessório ou jogo' };
   }
 
   for (const kw of EXCLUDED_KEYWORDS) {
     const normKw = normalizeText(kw);
-    // Permitir "controle" ou "dualsense" apenas se a palavra "console" também estiver no título
     if ((normKw === 'controle' || normKw === 'dualsense') && norm.includes('console')) {
       continue;
     }
@@ -146,7 +163,7 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
   }
 
   // Checar se é PS5 Pro
-  if (/\bps5\s+pro\b|\bplaystation\s+5\s+pro\b/.test(norm)) {
+  if (/\bps5\s+pro\b|\bplaystation\s*®?\s*5\s+pro\b/.test(norm)) {
     return {
       isValidConsole: true,
       edition: 'pro',
@@ -154,11 +171,9 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
     };
   }
 
-  // Determinar se é Digital (Sem Disco) ou Com Leitor de Disco
   const isDigital = DIGITAL_KEYWORDS.some((kw) => norm.includes(normalizeText(kw)));
   const isDisc = DISC_KEYWORDS.some((kw) => norm.includes(normalizeText(kw)));
 
-  // Se diz "sem leitor de disco" ou "sem disco", é digital mesmo contendo a palavra "disco"
   if (norm.includes('sem disco') || norm.includes('sem leitor') || isDigital) {
     return {
       isValidConsole: true,
@@ -175,12 +190,10 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
     };
   }
 
-  // Se é um Console PS5 válido mas o título não especifica explícito "Digital" nem "Com Disco",
-  // classificamos pelo padrão ou como 'disc' / 'digital' dependendo de pistas adicionais
   return {
     isValidConsole: true,
-    edition: 'disc', // Na dúvida, assume-se ou avalia-se pelo teto
-    editionLabel: 'PS5 Console (Verificar Edição no Link)',
+    edition: 'disc',
+    editionLabel: 'PS5 Slim Com Leitor de Disco',
   };
 }
 

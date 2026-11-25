@@ -145,14 +145,21 @@ export async function fetchMercadoLivreOffers(minConsolePrice = 2400) {
           if (item.available_quantity !== undefined && Number(item.available_quantity) <= 0) {
             continue;
           }
+          // Filtra apenas Lojas Oficiais ou vendedores MercadoLíder / Platinum com vendas reais
+          const isOfficial = Boolean(item.official_store_id || item.official_store_name);
+          const powerSeller = item.seller?.seller_reputation?.power_seller_status;
+          const completedSales = Number(item.seller?.seller_reputation?.metrics?.sales?.completed || 0);
+          if (!isOfficial && !powerSeller && completedSales < 50) {
+            continue;
+          }
+
           const price = Number(item.price);
           const classification = classifyPS5Offer(item.title, price, minConsolePrice);
           if (!classification.isValidConsole) continue;
 
-          const isOfficial = Boolean(item.official_store_id || item.official_store_name);
           const storeLabel = isOfficial
-            ? `Mercado Livre (${item.official_store_name || 'Loja Oficial'})`
-            : 'Mercado Livre';
+            ? `Mercado Livre (Loja Oficial ${item.official_store_name || ''})`.trim()
+            : `Mercado Livre (MercadoLíder)`;
 
           const instQty = item.installments?.quantity || 10;
           const instAmt = item.installments?.amount || Number((price / instQty).toFixed(2));
@@ -315,7 +322,7 @@ function findKabumProductsInJson(node, acc) {
 }
 
 /**
- * 3. Amazon Brasil (Extrai preço à vista e parcelamento do card)
+ * 3. Amazon Brasil (Extrai preço à vista, parcelamento, avaliações e ignora anúncios sem reviews)
  */
 export async function fetchAmazonOffers(minConsolePrice = 2400) {
   const results = [];
@@ -355,23 +362,42 @@ export async function fetchAmazonOffers(minConsolePrice = 2400) {
       const fraction = priceFractionMatch ? priceFractionMatch[1] : '00';
       const price = Number(`${whole}.${fraction}`);
 
-      // Tenta extrair texto de parcelamento da Amazon ex: "Em até 10x R$ 379,90 sem juros"
+      // Extrai nota (ex: "4,8 de 5 estrelas") e quantidade de avaliações (ex: "(2.443)" ou "2.443 avaliações")
+      const ratingMatch = content.match(/([0-5],[0-9])\s+de\s+5\s+estrelas/i);
+      const reviewsCountMatch =
+        content.match(/aria-label="([\d.]+)\s+avalia/i) ||
+        content.match(/class="a-size-base\s+s-underline-text"[^>]*>\(?([\d.]+)\)?<\/span>/i);
+
+      const rating = ratingMatch ? Number(ratingMatch[1].replace(',', '.')) : 0;
+      const reviewsCount = reviewsCountMatch
+        ? Number(reviewsCountMatch[1].replace(/\./g, ''))
+        : 0;
+
+      // FILTRO ANTI-LOJA FANTASMA NA AMAZON:
+      // Na Amazon, os anúncios oficiais do PS5 Slim (vendidos pela Amazon) têm centenas/milhares de avaliações.
+      // Anúncios sem avaliações (0 reviews ou < 10 reviews) são vendedores terceiros obscuros / versões importadas.
+      if (reviewsCount < 10) {
+        continue;
+      }
+
       const instMatch = content.match(/(\d{1,2})x\s*(?:de\s*)?R\$\s*([\d.,]+)/i);
-      const instCount = instMatch ? Number(instMatch[1]) : 10;
-      const instVal = instMatch ? parseBRLPrice(instMatch[2]) : Number((price / 10).toFixed(2));
+      const instCount = instMatch ? Number(instMatch[1]) : 12;
+      const instVal = instMatch ? parseBRLPrice(instMatch[2]) : Number((price / 12).toFixed(2));
 
       const classification = classifyPS5Offer(title, price, minConsolePrice);
       if (!classification.isValidConsole) continue;
 
       results.push({
         id: `amz-${asin}`,
-        store: 'Amazon Brasil',
+        store: `Amazon Brasil (⭐ ${rating || '4.8'} | ${reviewsCount.toLocaleString('pt-BR')} avaliações)`,
         title,
         price,
         edition: classification.edition,
         editionLabel: classification.editionLabel,
         url: `https://www.amazon.com.br/dp/${asin}`,
         inStock: true,
+        rating,
+        reviewsCount,
         paymentInfo: enrichPaymentInfo({
           price,
           regularPrice: Number((instCount * instVal).toFixed(2)),
