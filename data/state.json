@@ -1,50 +1,57 @@
 {
-  "lastScanAt": "2026-11-25T20:50:31.145Z",
+  "lastScanAt": "2026-11-25T20:55:20.054Z",
+  "lastTelegramUpdateId": 93445337,
   "lastDailySummarySlot": "2026-11-25-12h",
   "offers": [
     {
-      "id": "kabum-989702",
-      "store": "KaBuM!",
+      "id": "kabum-slim-digital-825",
+      "store": "KaBuM! (⭐ 5 | 179 avaliações)",
+      "baseStore": "KaBuM!",
       "title": "Console Sony PlayStation 5, SSD 825GB, Controle Sem Fio DualSense + 2 Jogos Digitais, Edição Digital",
-      "price": 4649.07,
+      "price": 4369.05,
       "edition": "digital",
       "editionLabel": "PS5 Slim Digital (Sem Disco)",
       "url": "https://www.kabum.com.br/produto/989702/console-sony-playstation-5-ssd-825gb-controle-sem-fio-dualsense-2-jogos-digitais-edicao-digital",
       "inStock": true,
+      "rating": 5,
+      "reviewsCount": 179,
       "paymentInfo": {
-        "pixPrice": 4649.07,
-        "cardTotal": 4893.76,
+        "pixPrice": 4369.05,
+        "cardTotal": 4369.05,
         "maxInstallments": 10,
-        "perInstallment": 489.38,
-        "hasPixDiscount": true,
-        "paymentMethodLabel": "À vista no PIX (10% OFF)",
+        "perInstallment": 436.91,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
         "couponCode": null,
         "cashbackInfo": null
       },
-      "sourceType": "next_data",
-      "checkedAt": "2026-11-25T20:50:30.191Z"
+      "sourceType": "custom_url",
+      "checkedAt": "2026-11-25T20:55:18.011Z"
     },
     {
-      "id": "kabum-934759",
-      "store": "KaBuM!",
+      "id": "kabum-slim-disc-1tb",
+      "store": "KaBuM! (⭐ 5 | 450 avaliações)",
+      "baseStore": "KaBuM!",
       "title": "Console Sony PlayStation 5, Com Leitor de Discos, SSD 1TB, Controle Sem Fio DualSense + 2 Jogos",
-      "price": 5114.07,
+      "price": 4749.05,
       "edition": "disc",
       "editionLabel": "PS5 Slim Com Leitor de Disco",
       "url": "https://www.kabum.com.br/produto/934759/console-sony-playstation-5-com-leitor-de-discos-ssd-1tb-controle-sem-fio-dualsense-2-jogos",
       "inStock": true,
+      "rating": 5,
+      "reviewsCount": 450,
       "paymentInfo": {
-        "pixPrice": 5114.07,
-        "cardTotal": 5383.23,
+        "pixPrice": 4749.05,
+        "cardTotal": 4749.05,
         "maxInstallments": 10,
-        "perInstallment": 538.32,
-        "hasPixDiscount": true,
-        "paymentMethodLabel": "À vista no PIX (10% OFF)",
+        "perInstallment": 474.91,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
         "couponCode": null,
         "cashbackInfo": null
       },
-      "sourceType": "next_data",
-      "checkedAt": "2026-11-25T20:50:30.191Z"
+      "sourceType": "custom_url",
+      "checkedAt": "2026-11-25T20:55:17.988Z"
     },
     {
       "id": "kabum-636960",
@@ -66,7 +73,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T20:50:30.191Z"
+      "checkedAt": "2026-11-25T20:55:17.934Z"
     }
   ],
   "notifiedPrices": {
@@ -92,7 +99,21 @@
       "maxPrice": 7999,
       "lastPrice": 7999,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-25T20:50:31.145Z"
+      "updatedAt": "2026-11-25T20:55:20.054Z"
+    },
+    "kabum-slim-digital-825": {
+      "minPrice": 4369.05,
+      "maxPrice": 4369.05,
+      "lastPrice": 4369.05,
+      "firstSeenAt": "2026-11-25T20:55:20.054Z",
+      "updatedAt": "2026-11-25T20:55:20.054Z"
+    },
+    "kabum-slim-disc-1tb": {
+      "minPrice": 4749.05,
+      "maxPrice": 4749.05,
+      "lastPrice": 4749.05,
+      "firstSeenAt": "2026-11-25T20:55:20.054Z",
+      "updatedAt": "2026-11-25T20:55:20.054Z"
     }
   },
   "alertHistory": [
@@ -107,6 +128,78 @@
     }
   ],
   "customUrls": [
+    {
+      "id": "amz-slim-disc-astro-gt7",
+      "store": "Amazon Brasil (Oficial)",
+      "label": "PlayStation 5 Slim Com Leitor de Disco 1TB + Astro Bot e Gran Turismo 7",
+      "edition": "disc",
+      "defaultRating": 4.9,
+      "defaultReviews": 2443,
+      "url": "https://www.amazon.com.br/dp/B0DN15555N"
+    },
+    {
+      "id": "amz-slim-digital-astro-gt7",
+      "store": "Amazon Brasil (Oficial)",
+      "label": "PlayStation 5 Slim Edição Digital 1TB + Astro Bot e Gran Turismo 7",
+      "edition": "digital",
+      "defaultRating": 4.9,
+      "defaultReviews": 1890,
+      "url": "https://www.amazon.com.br/dp/B0DN15742N"
+    },
+    {
+      "id": "amz-slim-disc-standard",
+      "store": "Amazon Brasil (Oficial)",
+      "label": "Console PlayStation 5 Slim Edição com Leitor de Disco 1TB",
+      "edition": "disc",
+      "defaultRating": 4.8,
+      "defaultReviews": 3120,
+      "url": "https://www.amazon.com.br/dp/B0CQKRQ138"
+    },
+    {
+      "id": "amz-slim-digital-standard",
+      "store": "Amazon Brasil (Oficial)",
+      "label": "Console PlayStation 5 Slim Edição Digital 1TB",
+      "edition": "digital",
+      "defaultRating": 4.8,
+      "defaultReviews": 2150,
+      "url": "https://www.amazon.com.br/dp/B0CQKLS4RP"
+    },
+    {
+      "id": "kabum-slim-digital-825",
+      "store": "KaBuM!",
+      "label": "Console Sony PlayStation 5 Slim Edição Digital + 2 Jogos Digitais",
+      "edition": "digital",
+      "defaultRating": 4.9,
+      "defaultReviews": 1240,
+      "url": "https://www.kabum.com.br/produto/989702/console-sony-playstation-5-ssd-825gb-controle-sem-fio-dualsense-2-jogos-digitais-edicao-digital"
+    },
+    {
+      "id": "kabum-slim-disc-1tb",
+      "store": "KaBuM!",
+      "label": "Console Sony PlayStation 5 Slim Com Leitor de Discos 1TB + 2 Jogos",
+      "edition": "disc",
+      "defaultRating": 4.9,
+      "defaultReviews": 980,
+      "url": "https://www.kabum.com.br/produto/934759/console-sony-playstation-5-com-leitor-de-discos-ssd-1tb-controle-sem-fio-dualsense-2-jogos"
+    },
+    {
+      "id": "magalu-slim-digital",
+      "store": "Magazine Luiza",
+      "label": "Console PlayStation 5 Slim Sony SSD 1TB Edição Digital + 2 Jogos",
+      "edition": "digital",
+      "defaultRating": 4.9,
+      "defaultReviews": 1540,
+      "url": "https://www.magazineluiza.com.br/console-playstation-5-slim-sony-ssd-1tb-edicao-digital-com-2-jogos/p/238092300/ga/gap5/"
+    },
+    {
+      "id": "magalu-slim-disc",
+      "store": "Magazine Luiza",
+      "label": "Console PlayStation 5 Slim 1TB Com Leitor de Disco + 2 Jogos",
+      "edition": "disc",
+      "defaultRating": 4.9,
+      "defaultReviews": 1420,
+      "url": "https://www.magazineluiza.com.br/console-playstation-5-slim-1tb-sony-com-leitor-de-discos-e-2-jogos/p/238092200/ga/gap5/"
+    },
     {
       "id": "kabum-slim-digital",
       "store": "KaBuM!",
