@@ -1,17 +1,28 @@
 {
-  "lastScanAt": "2026-11-25T00:45:20.835Z",
+  "lastScanAt": "2026-11-25T00:50:21.513Z",
+  "lastDailySummarySlot": null,
   "offers": [
     {
       "id": "kabum-989702",
-      "store": "KaBuM! (À vista no PIX)",
+      "store": "KaBuM!",
       "title": "Console Sony PlayStation 5, SSD 825GB, Controle Sem Fio DualSense + 2 Jogos Digitais, Edição Digital",
       "price": 4649.07,
       "edition": "digital",
       "editionLabel": "PS5 Slim Digital (Sem Disco)",
       "url": "https://www.kabum.com.br/produto/989702/console-sony-playstation-5-ssd-825gb-controle-sem-fio-dualsense-2-jogos-digitais-edicao-digital",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 4649.07,
+        "cardTotal": 4893.76,
+        "maxInstallments": 10,
+        "perInstallment": 489.38,
+        "hasPixDiscount": true,
+        "paymentMethodLabel": "À vista no PIX (10% OFF)",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:45:19.914Z"
+      "checkedAt": "2026-11-25T00:50:20.441Z"
     },
     {
       "id": "amz-B0FX62Z7LK",
@@ -22,8 +33,18 @@
       "editionLabel": "PS5 Slim Digital (Sem Disco)",
       "url": "https://www.amazon.com.br/dp/B0FX62Z7LK",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 4654.9,
+        "cardTotal": 4654.9,
+        "maxInstallments": 10,
+        "perInstallment": 465.49,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.472Z"
     },
     {
       "id": "amz-B0FTRYCKT1",
@@ -34,8 +55,18 @@
       "editionLabel": "PS5 Slim Digital (Sem Disco)",
       "url": "https://www.amazon.com.br/dp/B0FTRYCKT1",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 4654.9,
+        "cardTotal": 4654.9,
+        "maxInstallments": 10,
+        "perInstallment": 465.49,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.472Z"
     },
     {
       "id": "amz-B0CN5RCWDD",
@@ -46,8 +77,18 @@
       "editionLabel": "PS5 Console (Verificar Edição no Link)",
       "url": "https://www.amazon.com.br/dp/B0CN5RCWDD",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 4749.9,
+        "cardTotal": 4749.9,
+        "maxInstallments": 10,
+        "perInstallment": 474.99,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.082Z"
+      "checkedAt": "2026-11-25T00:50:20.476Z"
     },
     {
       "id": "amz-B0GBYZ4R2K",
@@ -58,8 +99,18 @@
       "editionLabel": "PS5 Console (Verificar Edição no Link)",
       "url": "https://www.amazon.com.br/dp/B0GBYZ4R2K",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 4939.9,
+        "cardTotal": 4939.9,
+        "maxInstallments": 10,
+        "perInstallment": 493.99,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.473Z"
     },
     {
       "id": "amz-B0H6LVH152",
@@ -70,20 +121,40 @@
       "editionLabel": "PS5 Slim Digital (Sem Disco)",
       "url": "https://www.amazon.com.br/dp/B0H6LVH152",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5048.9,
+        "cardTotal": 5048.9,
+        "maxInstallments": 10,
+        "perInstallment": 504.89,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.079Z"
+      "checkedAt": "2026-11-25T00:50:20.471Z"
     },
     {
       "id": "kabum-934759",
-      "store": "KaBuM! (À vista no PIX)",
+      "store": "KaBuM!",
       "title": "Console Sony PlayStation 5, Com Leitor de Discos, SSD 1TB, Controle Sem Fio DualSense + 2 Jogos",
       "price": 5114.07,
       "edition": "disc",
       "editionLabel": "PS5 Slim Com Leitor de Disco",
       "url": "https://www.kabum.com.br/produto/934759/console-sony-playstation-5-com-leitor-de-discos-ssd-1tb-controle-sem-fio-dualsense-2-jogos",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5114.07,
+        "cardTotal": 5383.23,
+        "maxInstallments": 10,
+        "perInstallment": 538.32,
+        "hasPixDiscount": true,
+        "paymentMethodLabel": "À vista no PIX (10% OFF)",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:45:19.914Z"
+      "checkedAt": "2026-11-25T00:50:20.441Z"
     },
     {
       "id": "amz-B0CM9VHGY7",
@@ -94,8 +165,18 @@
       "editionLabel": "PS5 Slim Com Leitor de Disco",
       "url": "https://www.amazon.com.br/dp/B0CM9VHGY7",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5129.9,
+        "cardTotal": 5129.9,
+        "maxInstallments": 10,
+        "perInstallment": 512.99,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.473Z"
     },
     {
       "id": "amz-B0CKZGY5B6",
@@ -106,8 +187,40 @@
       "editionLabel": "PS5 Console (Verificar Edição no Link)",
       "url": "https://www.amazon.com.br/dp/B0CKZGY5B6",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5224.9,
+        "cardTotal": 5224.9,
+        "maxInstallments": 10,
+        "perInstallment": 522.49,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.473Z"
+    },
+    {
+      "id": "amz-B0HN8L7Q46",
+      "store": "Amazon Brasil",
+      "title": "Bundle Marvel's Wolverine + PlayStation 5 Slim Disk - Pacote Astro Bot e Gran Turismo 7",
+      "price": 5376,
+      "edition": "disc",
+      "editionLabel": "PS5 Console (Verificar Edição no Link)",
+      "url": "https://www.amazon.com.br/dp/B0HN8L7Q46",
+      "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5376,
+        "cardTotal": 5376,
+        "maxInstallments": 10,
+        "perInstallment": 537.6,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:50:20.473Z"
     },
     {
       "id": "amz-B0H6LPVFWQ",
@@ -118,8 +231,18 @@
       "editionLabel": "PS5 Console (Verificar Edição no Link)",
       "url": "https://www.amazon.com.br/dp/B0H6LPVFWQ",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5548.9,
+        "cardTotal": 5548.9,
+        "maxInstallments": 10,
+        "perInstallment": 554.89,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.472Z"
     },
     {
       "id": "amz-B09FGC9T19",
@@ -130,8 +253,18 @@
       "editionLabel": "PS5 Console (Verificar Edição no Link)",
       "url": "https://www.amazon.com.br/dp/B09FGC9T19",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 5699.9,
+        "cardTotal": 5699.9,
+        "maxInstallments": 10,
+        "perInstallment": 569.99,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.082Z"
+      "checkedAt": "2026-11-25T00:50:20.478Z"
     },
     {
       "id": "amz-B0DHSSVDGM",
@@ -142,20 +275,40 @@
       "editionLabel": "PS5 Slim Digital (Sem Disco)",
       "url": "https://www.amazon.com.br/dp/B0DHSSVDGM",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 6749.9,
+        "cardTotal": 6749.9,
+        "maxInstallments": 10,
+        "perInstallment": 674.99,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:45:20.080Z"
+      "checkedAt": "2026-11-25T00:50:20.476Z"
     },
     {
       "id": "kabum-636960",
-      "store": "KaBuM! (À vista no PIX)",
+      "store": "KaBuM!",
       "title": "Console PlayStation 5 Pro Sony, SSD 2TB, Com Controle Sem Fio DualSense, Branco - 1000046552",
       "price": 7999,
       "edition": "pro",
       "editionLabel": "PS5 Pro",
       "url": "https://www.kabum.com.br/produto/636960/console-playstation-5-pro-sony-ssd-2tb-com-controle-sem-fio-dualsense-branco-1000046552",
       "inStock": true,
+      "paymentInfo": {
+        "pixPrice": 7999,
+        "cardTotal": 7999,
+        "maxInstallments": 10,
+        "perInstallment": 799.9,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista no PIX (10% OFF)",
+        "couponCode": null,
+        "cashbackInfo": null
+      },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:45:19.914Z"
+      "checkedAt": "2026-11-25T00:50:20.441Z"
     }
   ],
   "notifiedPrices": {
@@ -199,7 +352,15 @@
     },
     "amazon": {
       "ok": true,
-      "count": 10
+      "count": 11
+    },
+    "communityDeals": {
+      "ok": true,
+      "count": 0
+    },
+    "retailers": {
+      "ok": true,
+      "count": 0
     },
     "aggregators": {
       "ok": true,
