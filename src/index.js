@@ -1,7 +1,7 @@
 import { getConfig, updateEnvValues } from './config.js';
 import { evaluateTargetHit } from './classifier.js';
 import { scanAllStores } from './scrapers.js';
-import { loadState, saveState } from './store.js';
+import { loadState, saveState, updateOfferPriceHistory } from './store.js';
 import {
   sendTelegramMessage,
   buildOfferAlertMessage,
@@ -61,12 +61,13 @@ export async function runScanAndNotify() {
     currentState.lastScanAt = scannedAt;
     currentState.sourceStatus = sourceStatus;
     currentState.offers = offers;
+    updateOfferPriceHistory(currentState, offers);
 
     let alertsTriggered = 0;
     const minDrop = config.minPriceDropReais || 50;
 
     for (const offer of offers) {
-      const evaluation = evaluateTargetHit(offer, config);
+      const evaluation = evaluateTargetHit(offer, config, currentState.priceHistory);
       const statusIcon = evaluation.isHit ? '🔥 [META ATINGIDA]' : '  ';
       const pay = offer.paymentInfo;
       const cardLog =
@@ -127,7 +128,7 @@ export async function runScanAndNotify() {
     if (summaryHours.includes(hour) && offers.length > 0 && config.telegramBotToken) {
       const slotKey = `${dateStr}-${hour}h`;
       if (currentState.lastDailySummarySlot !== slotKey) {
-        const summaryMsg = buildDailySummaryMessage(offers, config);
+        const summaryMsg = buildDailySummaryMessage(offers, config, currentState.priceHistory);
         const tgRes = await sendTelegramMessage(
           config.telegramBotToken,
           config.telegramChatId,
@@ -236,7 +237,11 @@ async function pollTelegramCommands() {
         if (currentState.offers.length === 0) {
           await runScanAndNotify();
         }
-        const summaryMsg = buildDailySummaryMessage(currentState.offers, config);
+        const summaryMsg = buildDailySummaryMessage(
+          currentState.offers,
+          config,
+          currentState.priceHistory
+        );
         await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
       } else if (lower === '/buscar') {
         await sendTelegramMessage(
@@ -245,7 +250,11 @@ async function pollTelegramCommands() {
           `🔎 <b>Varrendo todas as lojas, Pelando e Promobit agora...</b>`
         );
         await runScanAndNotify();
-        const summaryMsg = buildDailySummaryMessage(currentState.offers, config);
+        const summaryMsg = buildDailySummaryMessage(
+          currentState.offers,
+          config,
+          currentState.priceHistory
+        );
         await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
       } else if (lower.startsWith('/meta')) {
         const parts = lower.split(/\s+/);

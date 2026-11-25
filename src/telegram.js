@@ -1,4 +1,5 @@
 import { updateEnvValues } from './config.js';
+import { analyzeBlackFridayVerdict } from './classifier.js';
 
 export function formatBRL(value) {
   return new Intl.NumberFormat('pt-BR', {
@@ -107,6 +108,22 @@ export function buildOfferAlertMessage(offer, evaluation) {
       ? `🔥 <b>${formatBRL(evaluation.savingsFromTarget)} abaixo da sua meta!</b>`
       : `🎯 <b>Atingiu exatamente sua meta!</b>`;
 
+  const verdict = evaluation.verdict || analyzeBlackFridayVerdict(offer);
+  const historyLines = [
+    `🕵️ <b>Termômetro Anti-Black Fraude (Buscapé 90 dias):</b>`,
+    `• <b>Veredito:</b> ${verdict.badge}`,
+    `• <b>Média real dos últimos 90 dias:</b> ${formatBRL(verdict.average90d)}`,
+    `• <b>Análise:</b> ${escapeHtml(verdict.explanation)}`,
+  ];
+
+  if (verdict.trackedStats) {
+    historyLines.push(
+      `• <b>Histórico deste link no seu robô:</b> Menor visto: <b>${formatBRL(
+        verdict.trackedStats.minSeen
+      )}</b> | Maior visto: ${formatBRL(verdict.trackedStats.maxSeen)}`
+    );
+  }
+
   return [
     `🚨 <b>ALERTA DE PREÇO PS5 (EM ESTOQUE)!</b> ${emoji}`,
     ``,
@@ -115,14 +132,17 @@ export function buildOfferAlertMessage(offer, evaluation) {
     `🏪 <b>Loja / Fonte:</b> ${escapeHtml(offer.store)}`,
     ``,
     formatPaymentBreakdown(offer),
-    `🎯 <b>Sua Meta:</b> ${formatBRL(evaluation.targetPrice)}`,
-    savingsText,
+    `🎯 <b>Sua Meta:</b> ${formatBRL(evaluation.targetPrice)} (${savingsText})`,
     ``,
-    `🛒 <a href="${escapeHtml(offer.url)}">CLIQUE AQUI PARA ABRIR A OFERTA</a>`,
+    ...historyLines,
+    ``,
+    `🛒 <a href="${escapeHtml(offer.url)}">CLIQUE AQUI PARA ABRIR A OFERTA</a> | 📈 <a href="${escapeHtml(
+      verdict.buscapeHistoryUrl
+    )}">Gráfico 6 Meses Buscapé</a>`,
   ].join('\n');
 }
 
-export function buildDailySummaryMessage(offers, config) {
+export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
   const topDigital = offers
     .filter((o) => o.edition === 'digital')
     .sort((a, b) => a.price - b.price)
@@ -143,21 +163,24 @@ export function buildDailySummaryMessage(offers, config) {
             ? ` | 💳 ${pay.maxInstallments}x ${formatBRL(pay.perInstallment)}`
             : '';
         const couponText = pay?.couponCode ? ` | 🎟️ Cupom: <code>${pay.couponCode}</code>` : '';
-        return `   ${idx + 1}. <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponText}\n      🏪 ${escapeHtml(
-          o.store
-        )} — <a href="${escapeHtml(o.url)}">Abrir Loja</a>`;
+        const verdict = analyzeBlackFridayVerdict(o, priceHistoryMap[o.id]);
+        return [
+          `   ${idx + 1}. <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponText}`,
+          `      ${verdict.badge} (Média 90d: ${formatBRL(verdict.average90d)})`,
+          `      🏪 ${escapeHtml(o.store)} — <a href="${escapeHtml(o.url)}">Abrir Loja</a>`,
+        ].join('\n');
       })
-      .join('\n');
+      .join('\n\n');
   };
 
   return [
-    `📊 <b>RESUMO DIÁRIO DE PREÇOS PS5 SLIM</b>`,
-    `<i>Seu robô está 100% ativo monitorando em segundo plano!</i>`,
+    `📊 <b>RESUMO DIÁRIO + DETECTOR ANTI-BLACK FRAUDE</b>`,
+    `<i>Comparando preços atuais em estoque com a média real dos últimos 90 dias (Buscapé/Zoom):</i>`,
     ``,
-    `🎮 <b>TOP 3 PS5 Slim Digital (Sua Meta: ${formatBRL(config.targetPriceDigital)}):</b>`,
+    `🎮 <b>TOP 3 PS5 Slim Digital (Sua Meta: ${formatBRL(config.targetPriceDigital)} | Média 90d: R$ 3.749):</b>`,
     formatList(topDigital),
     ``,
-    `💿 <b>TOP 3 PS5 Slim Com Disco (Sua Meta: ${formatBRL(config.targetPriceDisc)}):</b>`,
+    `💿 <b>TOP 3 PS5 Slim Com Disco (Sua Meta: ${formatBRL(config.targetPriceDisc)} | Média 90d: R$ 4.049):</b>`,
     formatList(topDisc),
     ``,
     `💡 <i>Envie /buscar a qualquer momento para forçar uma varredura ou /resumo para ver este ranking.</i>`,

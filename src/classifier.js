@@ -100,6 +100,36 @@ const DISC_KEYWORDS = [
   'CFI-1114A',
 ];
 
+/**
+ * Benchmarks reais do histórico de preços de 90 dias (Buscapé / Zoom) para PS5 Slim Nacional (Lacrado)
+ */
+export const MARKET_BENCHMARKS = {
+  digital: {
+    average90d: 3749, // Média normal dos últimos 90 dias fora de promoção
+    goodDealMax: 3599, // Preço de promoção real
+    historicLowMax: 3350, // Menor preço histórico / Black Friday real
+    inflatedMin: 3899, // Acima disso é preço cheio/inflado
+    buscapeHistoryUrl:
+      'https://www.buscape.com.br/console-de-videogame/console-playstation-5-slim-digital-edicao-digital?_lc=88#historico-de-precos',
+  },
+  disc: {
+    average90d: 4049, // Média normal dos últimos 90 dias fora de promoção
+    goodDealMax: 3849, // Preço de promoção real
+    historicLowMax: 3600, // Menor preço histórico / Black Friday real
+    inflatedMin: 4199, // Acima disso é preço cheio/inflado
+    buscapeHistoryUrl:
+      'https://www.buscape.com.br/console-de-videogame/console-playstation-5-slim-1tb-sony?_lc=88#historico-de-precos',
+  },
+  pro: {
+    average90d: 6699,
+    goodDealMax: 6299,
+    historicLowMax: 5899,
+    inflatedMin: 6999,
+    buscapeHistoryUrl:
+      'https://www.buscape.com.br/search?q=playstation+5+pro',
+  },
+};
+
 export function normalizeText(text = '') {
   return text
     .toLowerCase()
@@ -108,12 +138,7 @@ export function normalizeText(text = '') {
 }
 
 /**
- * Classifica um título de produto e preço:
- * Retorna:
- *  - isValidConsole: boolean
- *  - edition: 'digital' | 'disc' | 'pro' | 'unknown'
- *  - editionLabel: string
- *  - reason?: string (se ignorado)
+ * Classifica um título de produto e preço
  */
 export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
   if (!title || typeof price !== 'number' || Number.isNaN(price)) {
@@ -138,7 +163,6 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
 
   const norm = normalizeText(title);
 
-  // Tem que mencionar PS5 ou PlayStation 5
   const mentionsPS5 = CONSOLE_REQUIRED_KEYWORDS.some((kw) => norm.includes(normalizeText(kw)));
   if (!mentionsPS5) {
     return { isValidConsole: false, edition: 'unknown', reason: 'Não menciona PS5 / PlayStation 5' };
@@ -162,7 +186,6 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
     }
   }
 
-  // Checar se é PS5 Pro
   if (/\bps5\s+pro\b|\bplaystation\s*®?\s*5\s+pro\b/.test(norm)) {
     return {
       isValidConsole: true,
@@ -197,7 +220,64 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
   };
 }
 
-export function evaluateTargetHit(offer, config) {
+/**
+ * Detector Anti-Black Fraude:
+ * Compara o preço atual com a média histórica de 90 dias (Buscapé/Zoom) e com o histórico local salvo no state.json
+ */
+export function analyzeBlackFridayVerdict(offer, priceHistoryRecord = null) {
+  const bench = MARKET_BENCHMARKS[offer.edition] || MARKET_BENCHMARKS.disc;
+  const price = offer.price;
+  const diffFromAvg90d = bench.average90d - price;
+  const pctFromAvg90d = Math.round((diffFromAvg90d / bench.average90d) * 100);
+
+  // Detecta se a loja colocou um preço "De: R$ 5.200" mentiroso acima da média real de 90 dias
+  const claimedOriginal = offer.paymentInfo?.cardTotal || price;
+  const isFakeAnchor = claimedOriginal > bench.average90d + 450 && price > bench.goodDealMax;
+
+  let tier = 'normal';
+  let badge = '🟡 PREÇO NORMAL DE MERCADO';
+  let explanation = `Está na faixa normal dos últimos 90 dias (Média histórica: R$ ${bench.average90d}).`;
+
+  if (price <= bench.historicLowMax) {
+    tier = 'historic_low';
+    badge = '🔥 PREÇO HISTÓRICO DE BLACK FRIDAY (VALE MUITO!)';
+    explanation = `Está R$ ${diffFromAvg90d.toFixed(0)} (${pctFromAvg90d}%) ABAIXO da média dos últimos 90 dias (R$ ${bench.average90d})! Desconto 100% real!`;
+  } else if (price <= bench.goodDealMax) {
+    tier = 'good_deal';
+    badge = '🟢 PROMOÇÃO REAL (ABAIXO DA MÉDIA DE 90 DIAS)';
+    explanation = `Economia real de R$ ${diffFromAvg90d.toFixed(0)} (${pctFromAvg90d}% menor que a média de 90 dias de R$ ${bench.average90d}).`;
+  } else if (price >= bench.inflatedMin) {
+    tier = 'inflated';
+    badge = isFakeAnchor
+      ? '🚨 ALERTA BLACK FRAUDE (PREÇO INFLADO)'
+      : '🔴 ACIMA DA MÉDIA DOS ÚLTIMOS 90 DIAS';
+    explanation = `Está R$ ${Math.abs(diffFromAvg90d).toFixed(0)} mais caro que a média normal de 90 dias (R$ ${bench.average90d}). Não vale a pena agora.`;
+  }
+
+  let trackedStats = null;
+  if (priceHistoryRecord && priceHistoryRecord.minPrice) {
+    trackedStats = {
+      minSeen: Math.min(priceHistoryRecord.minPrice, price),
+      maxSeen: Math.max(priceHistoryRecord.maxPrice || price, price),
+      lastPrice: priceHistoryRecord.lastPrice || price,
+      isLowestEverSeenByBot: price <= priceHistoryRecord.minPrice,
+    };
+  }
+
+  return {
+    tier,
+    badge,
+    explanation,
+    average90d: bench.average90d,
+    diffFromAvg90d,
+    pctFromAvg90d,
+    isFakeAnchor,
+    buscapeHistoryUrl: bench.buscapeHistoryUrl,
+    trackedStats,
+  };
+}
+
+export function evaluateTargetHit(offer, config, priceHistoryMap = {}) {
   const target =
     offer.edition === 'digital'
       ? config.targetPriceDigital
@@ -205,10 +285,13 @@ export function evaluateTargetHit(offer, config) {
 
   const isHit = offer.price <= target;
   const diff = target - offer.price;
+  const historyRecord = priceHistoryMap[offer.id] || null;
+  const verdict = analyzeBlackFridayVerdict(offer, historyRecord);
 
   return {
     isHit,
     targetPrice: target,
     savingsFromTarget: diff,
+    verdict,
   };
 }

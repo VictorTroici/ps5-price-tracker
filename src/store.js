@@ -35,6 +35,7 @@ export function loadState() {
       lastDailySummarySlot: null,
       offers: [],
       notifiedPrices: {},
+      priceHistory: {}, // { [offerId]: { minPrice, maxPrice, lastPrice, firstSeenAt, updatedAt } }
       alertHistory: [],
       customUrls: DEFAULT_CUSTOM_URLS,
       sourceStatus: {},
@@ -51,6 +52,7 @@ export function loadState() {
       lastDailySummarySlot: parsed.lastDailySummarySlot || null,
       offers: Array.isArray(parsed.offers) ? parsed.offers : [],
       notifiedPrices: parsed.notifiedPrices || {},
+      priceHistory: parsed.priceHistory || {},
       alertHistory: Array.isArray(parsed.alertHistory) ? parsed.alertHistory : [],
       customUrls: Array.isArray(parsed.customUrls) ? parsed.customUrls : DEFAULT_CUSTOM_URLS,
       sourceStatus: parsed.sourceStatus || {},
@@ -61,10 +63,37 @@ export function loadState() {
       lastDailySummarySlot: null,
       offers: [],
       notifiedPrices: {},
+      priceHistory: {},
       alertHistory: [],
       customUrls: DEFAULT_CUSTOM_URLS,
       sourceStatus: {},
     };
+  }
+}
+
+export function updateOfferPriceHistory(state, offers) {
+  if (!state.priceHistory) state.priceHistory = {};
+  const now = new Date().toISOString();
+
+  for (const offer of offers) {
+    const prev = state.priceHistory[offer.id];
+    if (!prev) {
+      state.priceHistory[offer.id] = {
+        minPrice: offer.price,
+        maxPrice: offer.price,
+        lastPrice: offer.price,
+        firstSeenAt: now,
+        updatedAt: now,
+      };
+    } else {
+      state.priceHistory[offer.id] = {
+        minPrice: Math.min(prev.minPrice, offer.price),
+        maxPrice: Math.max(prev.maxPrice, offer.price),
+        lastPrice: offer.price,
+        firstSeenAt: prev.firstSeenAt || now,
+        updatedAt: now,
+      };
+    }
   }
 }
 
