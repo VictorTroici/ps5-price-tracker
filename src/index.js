@@ -5,12 +5,34 @@ import { loadState, saveState } from './store.js';
 import {
   sendTelegramMessage,
   buildOfferAlertMessage,
+  buildDailySummaryMessage,
   formatBRL,
 } from './telegram.js';
 import { startDashboardServer } from './dashboard.js';
 
 let currentState = loadState();
 let isScanning = false;
+
+/**
+ * Retorna a data e hora atual no fuso de Brasília (America/Sao_Paulo)
+ */
+function getBrasiliaDateParts() {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    formatter.formatToParts(new Date()).map((p) => [p.type, p.value])
+  );
+  return {
+    dateStr: `${parts.year}-${parts.month}-${parts.day}`,
+    hour: Number(parts.hour),
+  };
+}
 
 export async function runScanAndNotify() {
   if (isScanning) {
@@ -21,10 +43,10 @@ export async function runScanAndNotify() {
   try {
     const config = getConfig();
     console.log(
-      `\n🔎 [${new Date().toLocaleTimeString('pt-BR')}] Iniciando varredura de preços do PS5 Slim...`
+      `\n🔎 [${new Date().toLocaleTimeString('pt-BR')}] Iniciando varredura completa de preços do PS5 Slim...`
     );
     console.log(
-      `   🎯 Metas atuais -> Digital (Sem Disco): ${formatBRL(
+      `   🎯 Metas -> Digital: ${formatBRL(
         config.targetPriceDigital
       )} | Com Disco: ${formatBRL(config.targetPriceDisc)} | Variação mín.: ${formatBRL(
         config.minPriceDropReais
@@ -46,15 +68,23 @@ export async function runScanAndNotify() {
     for (const offer of offers) {
       const evaluation = evaluateTargetHit(offer, config);
       const statusIcon = evaluation.isHit ? '🔥 [META ATINGIDA]' : '  ';
+      const pay = offer.paymentInfo;
+      const cardLog =
+        pay && pay.cardTotal
+          ? ` | Cartão: ${pay.maxInstallments}x ${formatBRL(pay.perInstallment)} (${formatBRL(
+              pay.cardTotal
+            )})`
+          : '';
+      const couponLog = pay?.couponCode ? ` | CUPOM: ${pay.couponCode}` : '';
+
       console.log(
-        `   ${statusIcon} [${offer.store}] ${offer.editionLabel} -> ${formatBRL(
+        `   ${statusIcon} [${offer.store}] ${offer.editionLabel} -> PIX: ${formatBRL(
           offer.price
-        )} (${offer.title.slice(0, 60)}...)`
+        )}${cardLog}${couponLog} (${offer.title.slice(0, 50)}...)`
       );
 
       if (evaluation.isHit) {
         const prevNotifiedPrice = currentState.notifiedPrices[offer.id];
-        // Só envia no Telegram se nunca enviou com sucesso antes OU se teve uma queda significativa (>= minDrop, padrão R$ 50)
         const shouldNotify =
           prevNotifiedPrice === undefined || offer.price <= prevNotifiedPrice - minDrop;
 
@@ -67,7 +97,6 @@ export async function runScanAndNotify() {
               msg
             );
             if (tgRes.ok) {
-              // IMPORTANTE: Só grava que notificou DEPOIS que o Telegram confirmar envio!
               alertsTriggered++;
               currentState.notifiedPrices[offer.id] = offer.price;
               currentState.alertHistory.unshift({
@@ -87,24 +116,33 @@ export async function runScanAndNotify() {
             } else {
               console.warn(`   ⚠️ Falha ao enviar Telegram: ${tgRes.error}`);
             }
-          } else {
-            console.log(
-              `   💡 [Dica] Oferta atingiu sua meta! Configure TELEGRAM_BOT_TOKEN no .env para receber no celular.`
-            );
           }
         }
       }
     }
 
-    if (offers.length === 0) {
-      console.log(
-        `   ℹ️ Nenhuma oferta retornada diretamente na varredura automática.`
-      );
-    } else {
-      console.log(
-        `✅ Varredura concluída: ${offers.length} ofertas de PS5 analisadas | ${alertsTriggered} alertas enviados no Telegram.`
-      );
+    // Verifica se está na hora do Resumo Diário (12h ou 20h horário de Brasília)
+    const { dateStr, hour } = getBrasiliaDateParts();
+    const summaryHours = config.dailySummaryHours || [12, 20];
+    if (summaryHours.includes(hour) && offers.length > 0 && config.telegramBotToken) {
+      const slotKey = `${dateStr}-${hour}h`;
+      if (currentState.lastDailySummarySlot !== slotKey) {
+        const summaryMsg = buildDailySummaryMessage(offers, config);
+        const tgRes = await sendTelegramMessage(
+          config.telegramBotToken,
+          config.telegramChatId,
+          summaryMsg
+        );
+        if (tgRes.ok) {
+          currentState.lastDailySummarySlot = slotKey;
+          console.log(`   📊 Resumo Diário (${slotKey}) enviado com sucesso no Telegram!`);
+        }
+      }
     }
+
+    console.log(
+      `✅ Varredura concluída: ${offers.length} ofertas em estoque analisadas | ${alertsTriggered} alertas enviados.`
+    );
 
     saveState(currentState);
     return {
@@ -119,8 +157,9 @@ export async function runScanAndNotify() {
 
 /**
  * Escuta comandos enviados pelo usuário diretamente no bot do Telegram:
- * /start ou /status -> Mostra o resumo e os menores preços atuais
- * /buscar -> Faz uma busca imediata nas lojas e responde no Telegram
+ * /start ou /status -> Mostra o resumo e os menores preços atuais (PIX e Cartão)
+ * /resumo -> Envia o TOP 3 ofertas Digital e Com Disco na hora
+ * /buscar -> Faz uma busca imediata em todas as lojas e responde no Telegram
  * /meta 3700 3900 -> Altera a meta do Digital e Com Disco direto pelo Telegram
  */
 let lastUpdateId = 0;
@@ -146,11 +185,9 @@ async function pollTelegramCommands() {
       const text = (msg?.text || '').trim();
       if (!chatId || !text) continue;
 
-      // Se o TELEGRAM_CHAT_ID ainda não estava salvo, salva agora automaticamente e dispara varredura!
       const wasUnlinked = !config.telegramChatId;
       if (wasUnlinked || config.telegramChatId !== chatId) {
         updateEnvValues({ TELEGRAM_CHAT_ID: chatId });
-        console.log(`🔗 Telegram vinculado automaticamente ao Chat ID: ${chatId}`);
       }
 
       const lower = text.toLowerCase();
@@ -163,52 +200,53 @@ async function pollTelegramCommands() {
           .filter((o) => o.edition === 'disc')
           .sort((a, b) => a.price - b.price)[0];
 
+        const formatBest = (o, label) => {
+          if (!o) return `${label}: Sem oferta em estoque`;
+          const pay = o.paymentInfo;
+          const cardStr =
+            pay && pay.cardTotal
+              ? ` | 💳 ${pay.maxInstallments}x de ${formatBRL(pay.perInstallment)}`
+              : '';
+          return `${label}: <b>${formatBRL(o.price)} no PIX</b>${cardStr} (${
+            o.store
+          }) — <a href="${o.url}">Ver</a>`;
+        };
+
         const reply = [
-          `🤖 <b>Monitor Automático PS5 Slim Ativo!</b>`,
+          `🤖 <b>Monitor Automático PS5 Slim Pro Ativo!</b>`,
           ``,
-          `⏱️ <b>Verificação automática:</b> de hora em hora (só envia alerta quando bater a meta ou cair pelo menos ${formatBRL(
-            config.minPriceDropReais
-          )}).`,
+          `🏪 <b>Fontes monitoradas:</b> Amazon, KaBuM!, Mercado Livre (Lojas Oficiais), Magazine Luiza, Carrefour, Casas Bahia, Pelando, Promobit, Zoom e Buscapé.`,
+          `📊 <b>Resumo Diário Automático:</b> Todo dia às 12h e às 20h.`,
           `🎯 <b>Sua Meta Digital:</b> ${formatBRL(config.targetPriceDigital)}`,
           `🎯 <b>Sua Meta Com Disco:</b> ${formatBRL(config.targetPriceDisc)}`,
           ``,
-          `📊 <b>Melhores preços da última varredura:</b>`,
-          bestDigital
-            ? `🎮 Digital: <b>${formatBRL(bestDigital.price)}</b> (${bestDigital.store}) — <a href="${bestDigital.url}">Ver</a>`
-            : `🎮 Digital: Sem oferta carregada`,
-          bestDisc
-            ? `💿 Com Disco: <b>${formatBRL(bestDisc.price)}</b> (${bestDisc.store}) — <a href="${bestDisc.url}">Ver</a>`
-            : `💿 Com Disco: Sem oferta carregada`,
+          `🏆 <b>Menores preços EM ESTOQUE agora:</b>`,
+          formatBest(bestDigital, '🎮 Digital'),
+          formatBest(bestDisc, '💿 Com Disco'),
           ``,
-          `💡 <b>Comandos aqui no Telegram:</b>`,
+          `💡 <b>Comandos no Telegram:</b>`,
+          `• /resumo — Envia o TOP 3 Digital e Com Disco agora`,
           `• /buscar — Verifica todas as lojas agora mesmo`,
           `• /status — Mostra os menores preços atuais`,
-          `• /meta 3700 3950 — Muda suas metas (Digital e Com Disco)`,
+          `• /meta 3700 3950 — Muda suas metas`,
         ].join('\n');
 
         await sendTelegramMessage(config.telegramBotToken, chatId, reply);
-
-        // Se acabou de vincular e já tinha oferta batendo a meta que falhou antes, envia o alerta agora!
-        if (wasUnlinked) {
+      } else if (lower === '/resumo') {
+        if (currentState.offers.length === 0) {
           await runScanAndNotify();
         }
+        const summaryMsg = buildDailySummaryMessage(currentState.offers, config);
+        await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
       } else if (lower === '/buscar') {
         await sendTelegramMessage(
           config.telegramBotToken,
           chatId,
-          `🔎 <b>Varrendo Amazon, KaBuM!, Mercado Livre, Zoom e Buscapé agora...</b>`
+          `🔎 <b>Varrendo todas as lojas, Pelando e Promobit agora...</b>`
         );
         await runScanAndNotify();
-        const best = currentState.offers[0];
-        if (best) {
-          await sendTelegramMessage(
-            config.telegramBotToken,
-            chatId,
-            `✅ Varredura concluída! Menor preço encontrado agora:\n<b>${best.title}</b>\n💰 <b>${formatBRL(
-              best.price
-            )}</b> na <b>${best.store}</b>\n🛒 <a href="${best.url}">Abrir Oferta</a>`
-          );
-        }
+        const summaryMsg = buildDailySummaryMessage(currentState.offers, config);
+        await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
       } else if (lower.startsWith('/meta')) {
         const parts = lower.split(/\s+/);
         const newDig = Number(parts[1]);
@@ -229,13 +267,13 @@ async function pollTelegramCommands() {
           await sendTelegramMessage(
             config.telegramBotToken,
             chatId,
-            `ℹ️ Use o formato: <code>/meta 3700 3950</code> (Digital e Com Disco)`
+            `ℹ️ Use o formato: <code>/meta 3700 3950</code>`
           );
         }
       }
     }
   } catch {
-    // Silencioso em falha temporária de polling
+    // Silencioso
   }
 }
 
@@ -243,32 +281,10 @@ async function main() {
   const args = process.argv.slice(2);
   const config = getConfig();
 
-  // Se houve alerta salvo sem ter sido enviado no Telegram (quando o CHAT_ID estava vazio), limpa para poder enviar!
-  if (!config.telegramChatId && Object.keys(currentState.notifiedPrices || {}).length > 0) {
-    currentState.notifiedPrices = {};
-    saveState(currentState);
-  }
-
-  if (args.includes('--test-telegram')) {
-    console.log('📲 Testando envio de alerta para o Telegram...');
-    const msg = [
-      `✅ <b>Teste do Monitor de Preços PS5 Slim!</b>`,
-      ``,
-      `Seu alerta está funcionando! Assim que um PS5 atingir sua meta, você receberá o link direto aqui.`,
-      `🎮 <b>Meta Digital (Sem Disco):</b> ${formatBRL(config.targetPriceDigital)}`,
-      `💿 <b>Meta Com Leitor de Disco:</b> ${formatBRL(config.targetPriceDisc)}`,
-    ].join('\n');
-
-    const res = await sendTelegramMessage(
-      config.telegramBotToken,
-      config.telegramChatId,
-      msg
-    );
-    if (res.ok) {
-      console.log(`🎉 Sucesso! Mensagem enviada para o Chat ID: ${res.chatId}`);
-    } else {
-      console.error(`❌ Erro ao enviar mensagem: ${res.error}`);
-    }
+  if (args.includes('--send-summary')) {
+    await runScanAndNotify();
+    const summaryMsg = buildDailySummaryMessage(currentState.offers, config);
+    await sendTelegramMessage(config.telegramBotToken, config.telegramChatId, summaryMsg);
     return;
   }
 
@@ -278,7 +294,6 @@ async function main() {
     return;
   }
 
-  // Modo contínuo + Comandos no Telegram + Dashboard Web
   startDashboardServer({
     getState: () => currentState,
     runScanNow: () => runScanAndNotify(),
@@ -294,18 +309,11 @@ async function main() {
   await pollTelegramCommands();
   await runScanAndNotify();
 
-  // Escuta mensagens que você mandar para o bot no Telegram a cada 5 segundos
   setInterval(() => {
     pollTelegramCommands();
   }, 5000);
 
-  const intervalMs = Math.max(1, config.checkIntervalMinutes || 60) * 60 * 1000;
-  console.log(
-    `⏱️ Monitoramento automático de hora em hora ativo! (Verificando lojas a cada ${
-      config.checkIntervalMinutes || 60
-    } minutos e escutando seu bot no Telegram em tempo real).`
-  );
-
+  const intervalMs = Math.max(1, config.checkIntervalMinutes || 10) * 60 * 1000;
   setInterval(() => {
     runScanAndNotify().catch((err) =>
       console.error('Erro no ciclo de monitoramento:', err.message)

@@ -26,11 +26,47 @@ export function parseBRLPrice(raw) {
 }
 
 /**
+ * Calcula / normaliza informações de pagamento (PIX vs Parcelado em até 10x/12x)
+ */
+export function enrichPaymentInfo({
+  price,
+  regularPrice,
+  installmentsCount,
+  installmentValue,
+  paymentMethodLabel,
+  couponCode,
+  cashbackInfo,
+}) {
+  const pixPrice = Number(price);
+  let cardTotal = regularPrice && Number(regularPrice) >= pixPrice ? Number(regularPrice) : null;
+  let maxInstallments = installmentsCount ? Number(installmentsCount) : 10;
+  let perInstallment = installmentValue ? Number(installmentValue) : null;
+
+  if (!cardTotal && perInstallment && maxInstallments) {
+    cardTotal = Number((perInstallment * maxInstallments).toFixed(2));
+  }
+  if (cardTotal && !perInstallment && maxInstallments) {
+    perInstallment = Number((cardTotal / maxInstallments).toFixed(2));
+  }
+
+  return {
+    pixPrice,
+    cardTotal: cardTotal || pixPrice,
+    maxInstallments,
+    perInstallment: perInstallment || Number(((cardTotal || pixPrice) / maxInstallments).toFixed(2)),
+    hasPixDiscount: Boolean(cardTotal && cardTotal > pixPrice + 5),
+    paymentMethodLabel:
+      paymentMethodLabel ||
+      (cardTotal && cardTotal > pixPrice + 5 ? 'À vista no PIX (c/ desconto)' : 'À vista ou Parcelado'),
+    couponCode: couponCode || null,
+    cashbackInfo: cashbackInfo || null,
+  };
+}
+
+/**
  * Verifica se a oferta no JSON-LD (Schema.org) ou no HTML da página está em estoque (Disponível).
- * Retorna false se detectar OutOfStock, SoldOut, Indisponível ou Produto Esgotado.
  */
 export function isOfferInStock({ schemaAvailability, htmlSnippet = '', fullPageHtml = '' }) {
-  // 1. Checa campo availability do Schema.org (JSON-LD)
   if (schemaAvailability && typeof schemaAvailability === 'string') {
     const availLower = schemaAvailability.toLowerCase();
     if (
@@ -40,12 +76,15 @@ export function isOfferInStock({ schemaAvailability, htmlSnippet = '', fullPageH
     ) {
       return false;
     }
-    if (availLower.includes('instock') || availLower.includes('limitedavailability') || availLower.includes('onlineonly')) {
+    if (
+      availLower.includes('instock') ||
+      availLower.includes('limitedavailability') ||
+      availLower.includes('onlineonly')
+    ) {
       return true;
     }
   }
 
-  // 2. Checa fragmento do card na listagem
   if (htmlSnippet) {
     const snippetLower = htmlSnippet.toLowerCase();
     if (
@@ -53,16 +92,16 @@ export function isOfferInStock({ schemaAvailability, htmlSnippet = '', fullPageH
       snippetLower.includes('produto indisponível') ||
       snippetLower.includes('produto indisponivel') ||
       snippetLower.includes('avise-me quando chegar') ||
-      snippetLower.includes('não disponível')
+      snippetLower.includes('não disponível') ||
+      snippetLower.includes('oferta encerrada') ||
+      snippetLower.includes('promoção encerrada')
     ) {
       return false;
     }
   }
 
-  // 3. Checa HTML completo de página de produto individual
   if (fullPageHtml) {
     const pageLower = fullPageHtml.toLowerCase();
-    // KaBuM!, Magalu, Amazon, Mercado Livre marcadores explícitos de sem estoque
     if (
       pageLower.includes('"availability":"https://schema.org/outofstock"') ||
       pageLower.includes('"availability":"http://schema.org/outofstock"') ||
@@ -79,11 +118,16 @@ export function isOfferInStock({ schemaAvailability, htmlSnippet = '', fullPageH
 }
 
 /**
- * 1. Mercado Livre Brasil (API Pública de Busca + Fallback HTML)
+ * 1. Mercado Livre Brasil (API Oficial + Loja Oficial PlayStation + Fallback HTML)
  */
 export async function fetchMercadoLivreOffers(minConsolePrice = 2400) {
   const results = [];
-  const queries = ['console playstation 5 slim', 'ps5 slim digital', 'ps5 slim disco'];
+  const queries = [
+    'console playstation 5 slim',
+    'ps5 slim digital',
+    'ps5 slim com leitor',
+    'playstation 5 slim loja oficial',
+  ];
 
   for (const q of queries) {
     try {
@@ -98,7 +142,6 @@ export async function fetchMercadoLivreOffers(minConsolePrice = 2400) {
       if (res.ok) {
         const data = await res.json();
         for (const item of data.results || []) {
-          // Garantir que tem estoque disponível
           if (item.available_quantity !== undefined && Number(item.available_quantity) <= 0) {
             continue;
           }
@@ -106,16 +149,30 @@ export async function fetchMercadoLivreOffers(minConsolePrice = 2400) {
           const classification = classifyPS5Offer(item.title, price, minConsolePrice);
           if (!classification.isValidConsole) continue;
 
+          const isOfficial = Boolean(item.official_store_id || item.official_store_name);
+          const storeLabel = isOfficial
+            ? `Mercado Livre (${item.official_store_name || 'Loja Oficial'})`
+            : 'Mercado Livre';
+
+          const instQty = item.installments?.quantity || 10;
+          const instAmt = item.installments?.amount || Number((price / instQty).toFixed(2));
+          const paymentInfo = enrichPaymentInfo({
+            price,
+            regularPrice: item.original_price || price,
+            installmentsCount: instQty,
+            installmentValue: instAmt,
+          });
+
           results.push({
             id: `ml-${item.id}`,
-            store: 'Mercado Livre',
+            store: storeLabel,
             title: item.title,
             price,
             edition: classification.edition,
             editionLabel: classification.editionLabel,
             url: item.permalink,
-            thumbnail: item.thumbnail || '',
             inStock: true,
+            paymentInfo,
             sourceType: 'api',
             checkedAt: new Date().toISOString(),
           });
@@ -163,6 +220,7 @@ async function fetchMercadoLivreHtmlFallback(query, minConsolePrice) {
       editionLabel: classification.editionLabel,
       url: link,
       inStock: true,
+      paymentInfo: enrichPaymentInfo({ price, installmentsCount: 10 }),
       sourceType: 'scraper',
       checkedAt: new Date().toISOString(),
     });
@@ -171,7 +229,7 @@ async function fetchMercadoLivreHtmlFallback(query, minConsolePrice) {
 }
 
 /**
- * 2. KaBuM! (Busca via HTML / __NEXT_DATA__ — verificando explicitamente available: true)
+ * 2. KaBuM! (Extrai tanto o preço à vista no PIX quanto o preço parcelado em 10x sem juros)
  */
 export async function fetchKabumOffers(minConsolePrice = 2400) {
   const results = [];
@@ -190,39 +248,46 @@ export async function fetchKabumOffers(minConsolePrice = 2400) {
     );
     if (nextDataMatch) {
       const json = JSON.parse(nextDataMatch[1]);
-      // Percorre recursivamente o JSON do Next.js procurando objetos de produtos da KaBuM!
       const products = [];
       findKabumProductsInJson(json, products);
 
       for (const prod of products) {
-        // Na KaBuM!, prod.available === false ou prod.quantity === 0 indica Produto Esgotado!
         if (prod.available === false) continue;
         if (prod.quantity !== undefined && Number(prod.quantity) <= 0) continue;
 
         const code = prod.code;
         const title = prod.name;
         const slug = prod.friendlyName || 'console-ps5';
-        const price = Number(prod.priceWithDiscount || prod.price);
+        const pixPrice = Number(prod.priceWithDiscount || prod.price);
+        const cardPrice = Number(prod.price || pixPrice);
 
-        const classification = classifyPS5Offer(title, price, minConsolePrice);
+        const classification = classifyPS5Offer(title, pixPrice, minConsolePrice);
         if (!classification.isValidConsole) continue;
+
+        const paymentInfo = enrichPaymentInfo({
+          price: pixPrice,
+          regularPrice: cardPrice,
+          installmentsCount: 10,
+          paymentMethodLabel: 'À vista no PIX (10% OFF)',
+        });
 
         results.push({
           id: `kabum-${code}`,
-          store: 'KaBuM! (À vista no PIX)',
+          store: 'KaBuM!',
           title,
-          price,
+          price: pixPrice,
           edition: classification.edition,
           editionLabel: classification.editionLabel,
           url: `https://www.kabum.com.br/produto/${code}/${slug}`,
           inStock: true,
+          paymentInfo,
           sourceType: 'next_data',
           checkedAt: new Date().toISOString(),
         });
       }
     }
   } catch {
-    // Silencioso caso haja bloqueio temporário
+    // Silencioso
   }
 
   return deduplicateOffers(results);
@@ -250,7 +315,7 @@ function findKabumProductsInJson(node, acc) {
 }
 
 /**
- * 3. Amazon Brasil (Busca pública HTML — filtrando apenas itens com preço ativo / em estoque)
+ * 3. Amazon Brasil (Extrai preço à vista e parcelamento do card)
  */
 export async function fetchAmazonOffers(minConsolePrice = 2400) {
   const results = [];
@@ -290,6 +355,11 @@ export async function fetchAmazonOffers(minConsolePrice = 2400) {
       const fraction = priceFractionMatch ? priceFractionMatch[1] : '00';
       const price = Number(`${whole}.${fraction}`);
 
+      // Tenta extrair texto de parcelamento da Amazon ex: "Em até 10x R$ 379,90 sem juros"
+      const instMatch = content.match(/(\d{1,2})x\s*(?:de\s*)?R\$\s*([\d.,]+)/i);
+      const instCount = instMatch ? Number(instMatch[1]) : 10;
+      const instVal = instMatch ? parseBRLPrice(instMatch[2]) : Number((price / 10).toFixed(2));
+
       const classification = classifyPS5Offer(title, price, minConsolePrice);
       if (!classification.isValidConsole) continue;
 
@@ -302,19 +372,262 @@ export async function fetchAmazonOffers(minConsolePrice = 2400) {
         editionLabel: classification.editionLabel,
         url: `https://www.amazon.com.br/dp/${asin}`,
         inStock: true,
+        paymentInfo: enrichPaymentInfo({
+          price,
+          regularPrice: Number((instCount * instVal).toFixed(2)),
+          installmentsCount: instCount,
+          installmentValue: instVal,
+        }),
         sourceType: 'scraper',
         checkedAt: new Date().toISOString(),
       });
     }
   } catch {
-    // Silencioso em caso de captcha
+    // Silencioso
   }
 
   return deduplicateOffers(results);
 }
 
 /**
- * 4. Agregadores de Ofertas (Zoom / Buscapé — verificando availability no JSON-LD)
+ * 4. Pelando & Promobit (Comunidades de Promoções, Cupons e Cashback)
+ * Onde aparecem os PS5 de R$ 3.100 a R$ 3.600 com cupom!
+ */
+export async function fetchCommunityDealOffers(minConsolePrice = 2400) {
+  const results = [];
+
+  // 4.1 Promobit (Busca de ofertas ativas de PS5)
+  try {
+    const promobitUrl = 'https://www.promobit.com.br/buscar?q=playstation%205%20slim';
+    const res = await fetch(promobitUrl, {
+      headers: DEFAULT_HEADERS,
+      signal: AbortSignal.timeout(12000),
+    });
+    if (res.ok) {
+      const html = await res.text();
+      // Extrai de JSON-LD ou __NEXT_DATA__ do Promobit
+      const nextMatch = html.match(
+        /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/
+      );
+      if (nextMatch) {
+        const json = JSON.parse(nextMatch[1]);
+        const offersList = [];
+        findCommunityDealsInJson(json, offersList);
+        for (const deal of offersList) {
+          if (deal.expired || deal.status === 'expired' || deal.isExpired) continue;
+          const title = deal.title || deal.name;
+          const price = parseBRLPrice(String(deal.price || ''));
+          const classification = classifyPS5Offer(title, price, minConsolePrice);
+          if (!classification.isValidConsole) continue;
+
+          const coupon = deal.coupon || deal.couponCode || extractCouponFromText(title);
+          const storeName = deal.storeName || deal.merchant || 'Promobit';
+          const link = deal.slug
+            ? `https://www.promobit.com.br/oferta/${deal.slug}`
+            : promobitUrl;
+
+          results.push({
+            id: `promobit-${deal.id || Buffer.from(link).toString('base64').slice(0, 12)}`,
+            store: `Promobit (${storeName})`,
+            title,
+            price,
+            edition: classification.edition,
+            editionLabel: classification.editionLabel,
+            url: link,
+            inStock: true,
+            paymentInfo: enrichPaymentInfo({
+              price,
+              couponCode: coupon,
+              paymentMethodLabel: coupon ? `Com Cupom: ${coupon}` : 'Oferta Comunidade',
+            }),
+            sourceType: 'community',
+            checkedAt: new Date().toISOString(),
+          });
+        }
+      }
+    }
+  } catch {
+    // Ignorar falha
+  }
+
+  // 4.2 Pelando (Busca de ofertas de PS5)
+  try {
+    const pelandoUrl = 'https://www.pelando.com.br/busca/playstation%205%20slim';
+    const res = await fetch(pelandoUrl, {
+      headers: DEFAULT_HEADERS,
+      signal: AbortSignal.timeout(12000),
+    });
+    if (res.ok) {
+      const html = await res.text();
+      const nextMatch = html.match(
+        /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/
+      );
+      if (nextMatch) {
+        const json = JSON.parse(nextMatch[1]);
+        const offersList = [];
+        findCommunityDealsInJson(json, offersList);
+        for (const deal of offersList) {
+          if (deal.expired || deal.status === 'EXPIRED' || deal.isExpired || deal.cold) continue;
+          const title = deal.title || deal.name;
+          const price = parseBRLPrice(String(deal.price || ''));
+          const classification = classifyPS5Offer(title, price, minConsolePrice);
+          if (!classification.isValidConsole) continue;
+
+          const coupon = deal.couponCode || deal.coupon || extractCouponFromText(title);
+          const storeName = deal.merchant?.name || deal.store?.name || 'Pelando';
+          const link = deal.url?.startsWith('http')
+            ? deal.url
+            : deal.id
+            ? `https://www.pelando.com.br/d/${deal.id}`
+            : pelandoUrl;
+
+          results.push({
+            id: `pelando-${deal.id || Buffer.from(link).toString('base64').slice(0, 12)}`,
+            store: `Pelando (${storeName})`,
+            title,
+            price,
+            edition: classification.edition,
+            editionLabel: classification.editionLabel,
+            url: link,
+            inStock: true,
+            paymentInfo: enrichPaymentInfo({
+              price,
+              couponCode: coupon,
+              paymentMethodLabel: coupon ? `Com Cupom: ${coupon}` : 'Oferta Comunidade',
+            }),
+            sourceType: 'community',
+            checkedAt: new Date().toISOString(),
+          });
+        }
+      }
+    }
+  } catch {
+    // Ignorar falha
+  }
+
+  return deduplicateOffers(results);
+}
+
+function findCommunityDealsInJson(node, acc) {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) {
+    for (const item of node) findCommunityDealsInJson(item, acc);
+    return;
+  }
+  if (
+    typeof node.title === 'string' &&
+    node.price !== undefined &&
+    Number(node.price) > 1000
+  ) {
+    acc.push(node);
+    return;
+  }
+  for (const val of Object.values(node)) {
+    if (val && typeof val === 'object') {
+      findCommunityDealsInJson(val, acc);
+    }
+  }
+}
+
+function extractCouponFromText(text = '') {
+  const m = text.match(/cupom[:\s]+([A-Z0-9]{4,20})/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+/**
+ * 5. Magazine Luiza, Carrefour e Casas Bahia (Varejistas Diretos via JSON-LD)
+ */
+export async function fetchDirectRetailersOffers(minConsolePrice = 2400) {
+  const results = [];
+  const retailers = [
+    {
+      name: 'Magazine Luiza',
+      prefix: 'magalu',
+      baseUrl: 'https://www.magazineluiza.com.br',
+      searchUrl: 'https://www.magazineluiza.com.br/busca/console+playstation+5+slim/',
+    },
+    {
+      name: 'Carrefour',
+      prefix: 'carrefour',
+      baseUrl: 'https://www.carrefour.com.br',
+      searchUrl: 'https://www.carrefour.com.br/busca/console-playstation-5-slim',
+    },
+    {
+      name: 'Casas Bahia',
+      prefix: 'casasbahia',
+      baseUrl: 'https://www.casasbahia.com.br',
+      searchUrl: 'https://www.casasbahia.com.br/console-playstation-5-slim/b',
+    },
+  ];
+
+  for (const ret of retailers) {
+    try {
+      const res = await fetch(ret.searchUrl, {
+        headers: DEFAULT_HEADERS,
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!res.ok) continue;
+      const html = await res.text();
+      const jsonLdMatches = html.matchAll(
+        /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
+      );
+
+      for (const m of jsonLdMatches) {
+        try {
+          const parsed = JSON.parse(m[1]);
+          const items =
+            parsed?.itemListElement ||
+            (parsed['@graph'] ? parsed['@graph'] : Array.isArray(parsed) ? parsed : [parsed]);
+          for (const entry of items) {
+            const prod = entry?.item || entry;
+            if (!prod?.name) continue;
+
+            const offerObj = Array.isArray(prod.offers) ? prod.offers[0] : prod.offers;
+            const availability = offerObj?.availability;
+            if (!isOfferInStock({ schemaAvailability: availability })) continue;
+
+            const rawPrice = offerObj?.lowPrice || offerObj?.price;
+            const highPrice = offerObj?.highPrice || rawPrice;
+            const price = parseBRLPrice(String(rawPrice || ''));
+            const classification = classifyPS5Offer(prod.name, price, minConsolePrice);
+            if (!classification.isValidConsole) continue;
+
+            const link = prod.url?.startsWith('http')
+              ? prod.url
+              : `${ret.baseUrl}${prod.url || ''}`;
+
+            results.push({
+              id: `${ret.prefix}-${Buffer.from(link).toString('base64').slice(0, 14)}`,
+              store: ret.name,
+              title: prod.name,
+              price,
+              edition: classification.edition,
+              editionLabel: classification.editionLabel,
+              url: link,
+              inStock: true,
+              paymentInfo: enrichPaymentInfo({
+                price,
+                regularPrice: parseBRLPrice(String(highPrice || price)),
+                installmentsCount: 10,
+              }),
+              sourceType: 'retailer',
+              checkedAt: new Date().toISOString(),
+            });
+          }
+        } catch {
+          // Ignorar JSON-LD malformado
+        }
+      }
+    } catch {
+      // Ignorar bloqueio de rede
+    }
+  }
+
+  return deduplicateOffers(results);
+}
+
+/**
+ * 6. Agregadores de Ofertas (Zoom / Buscapé — verificando availability no JSON-LD)
  */
 export async function fetchAggregatorOffers(minConsolePrice = 2400) {
   const results = [];
@@ -360,6 +673,7 @@ export async function fetchAggregatorOffers(minConsolePrice = 2400) {
               prod?.offers?.lowPrice ||
               prod?.offers?.price ||
               prod?.offers?.offers?.[0]?.price;
+            const highPrice = prod?.offers?.highPrice || rawPrice;
             const price = parseBRLPrice(String(rawPrice || ''));
             const classification = classifyPS5Offer(prod.name, price, minConsolePrice);
             if (!classification.isValidConsole) continue;
@@ -377,16 +691,21 @@ export async function fetchAggregatorOffers(minConsolePrice = 2400) {
               editionLabel: classification.editionLabel,
               url: link,
               inStock: true,
+              paymentInfo: enrichPaymentInfo({
+                price,
+                regularPrice: parseBRLPrice(String(highPrice || price)),
+                installmentsCount: 10,
+              }),
               sourceType: 'aggregator',
               checkedAt: new Date().toISOString(),
             });
           }
         } catch {
-          // Ignorar JSON-LD malformado
+          // Ignorar
         }
       }
     } catch {
-      // Ignorar falha de rede
+      // Ignorar
     }
   }
 
@@ -394,8 +713,7 @@ export async function fetchAggregatorOffers(minConsolePrice = 2400) {
 }
 
 /**
- * 5. Monitoramento de URLs Diretas Customizadas (Amazon, Kabum, Magalu, Mercado Livre, etc.)
- * Verifica rigorosamente se o produto NÃO está esgotado (OutOfStock / Produto Esgotado) antes de retornar!
+ * 7. Monitoramento de URLs Diretas Customizadas (Amazon, Kabum, Magalu, Mercado Livre, etc.)
  */
 export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
   try {
@@ -406,7 +724,6 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
     if (!res.ok) return null;
     const html = await res.text();
 
-    // 1. Tenta JSON-LD primeiro (Schema.org Product)
     const jsonLdMatches = html.matchAll(
       /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
     );
@@ -419,16 +736,14 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
             const title = node.name || item.label || 'Console PS5';
             const offerObj = Array.isArray(node.offers) ? node.offers[0] : node.offers;
 
-            // Checa disponibilidade no JSON-LD E no HTML da página (ex: "Produto Esgotado" na KaBuM!)
             const inStock = isOfferInStock({
               schemaAvailability: offerObj?.availability,
               fullPageHtml: html,
             });
-            if (!inStock) {
-              return null; // Ignora produto esgotado!
-            }
+            if (!inStock) return null;
 
             const rawPrice = offerObj?.lowPrice || offerObj?.price || offerObj?.highPrice;
+            const highPrice = offerObj?.highPrice || rawPrice;
             const price = parseBRLPrice(String(rawPrice || ''));
             const classification = classifyPS5Offer(title, price, minConsolePrice);
             if (classification.isValidConsole) {
@@ -446,6 +761,11 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
                     : classification.editionLabel,
                 url: item.url,
                 inStock: true,
+                paymentInfo: enrichPaymentInfo({
+                  price,
+                  regularPrice: parseBRLPrice(String(highPrice || price)),
+                  installmentsCount: 10,
+                }),
                 sourceType: 'custom_url',
                 checkedAt: new Date().toISOString(),
               };
@@ -453,14 +773,11 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
           }
         }
       } catch {
-        // Segue para o próximo bloco
+        // Segue
       }
     }
 
-    // 2. Fallback meta tags (somente se a página não indicar produto esgotado)
-    if (!isOfferInStock({ fullPageHtml: html })) {
-      return null;
-    }
+    if (!isOfferInStock({ fullPageHtml: html })) return null;
 
     const metaPrice =
       html.match(/property="product:price:amount"\s+content="([\d.,]+)"/i) ||
@@ -480,6 +797,7 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
           editionLabel: classification.editionLabel,
           url: item.url,
           inStock: true,
+          paymentInfo: enrichPaymentInfo({ price, installmentsCount: 10 }),
           sourceType: 'custom_url',
           checkedAt: new Date().toISOString(),
         };
@@ -497,26 +815,45 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
 export async function scanAllStores(config, customUrls = []) {
   const minPrice = config.minConsolePrice || 2400;
 
-  const [mlResult, kabumResult, amzResult, aggResult, ...customResults] =
-    await Promise.allSettled([
-      fetchMercadoLivreOffers(minPrice),
-      fetchKabumOffers(minPrice),
-      fetchAmazonOffers(minPrice),
-      fetchAggregatorOffers(minPrice),
-      ...customUrls.map((u) => fetchCustomProductUrl(u, minPrice)),
-    ]);
+  const [
+    mlResult,
+    kabumResult,
+    amzResult,
+    communityResult,
+    retailersResult,
+    aggResult,
+    ...customResults
+  ] = await Promise.allSettled([
+    fetchMercadoLivreOffers(minPrice),
+    fetchKabumOffers(minPrice),
+    fetchAmazonOffers(minPrice),
+    fetchCommunityDealOffers(minPrice),
+    fetchDirectRetailersOffers(minPrice),
+    fetchAggregatorOffers(minPrice),
+    ...customUrls.map((u) => fetchCustomProductUrl(u, minPrice)),
+  ]);
 
   const allOffers = [];
   const sourceStatus = {
     mercadoLivre: { ok: mlResult.status === 'fulfilled', count: mlResult.value?.length || 0 },
     kabum: { ok: kabumResult.status === 'fulfilled', count: kabumResult.value?.length || 0 },
     amazon: { ok: amzResult.status === 'fulfilled', count: amzResult.value?.length || 0 },
+    communityDeals: {
+      ok: communityResult.status === 'fulfilled',
+      count: communityResult.value?.length || 0,
+    },
+    retailers: {
+      ok: retailersResult.status === 'fulfilled',
+      count: retailersResult.value?.length || 0,
+    },
     aggregators: { ok: aggResult.status === 'fulfilled', count: aggResult.value?.length || 0 },
   };
 
   if (mlResult.status === 'fulfilled') allOffers.push(...mlResult.value);
   if (kabumResult.status === 'fulfilled') allOffers.push(...kabumResult.value);
   if (amzResult.status === 'fulfilled') allOffers.push(...amzResult.value);
+  if (communityResult.status === 'fulfilled') allOffers.push(...communityResult.value);
+  if (retailersResult.status === 'fulfilled') allOffers.push(...retailersResult.value);
   if (aggResult.status === 'fulfilled') allOffers.push(...aggResult.value);
 
   for (const c of customResults) {
@@ -552,10 +889,13 @@ function extractDomainName(url) {
     if (host.includes('amazon')) return 'Amazon Brasil';
     if (host.includes('kabum')) return 'KaBuM!';
     if (host.includes('magazineluiza') || host.includes('magalu')) return 'Magazine Luiza';
+    if (host.includes('carrefour')) return 'Carrefour';
+    if (host.includes('casasbahia')) return 'Casas Bahia';
     if (host.includes('mercadolivre')) return 'Mercado Livre';
     if (host.includes('zoom')) return 'Zoom';
     if (host.includes('buscape')) return 'Buscapé';
     if (host.includes('pelando')) return 'Pelando';
+    if (host.includes('promobit')) return 'Promobit';
     return host;
   } catch {
     return 'Loja Customizada';

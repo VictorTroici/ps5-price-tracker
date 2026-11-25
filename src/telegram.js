@@ -9,7 +9,7 @@ export function formatBRL(value) {
 
 /**
  * Se o usuário configurou apenas o TELEGRAM_BOT_TOKEN e mandou um "Oi" para o bot,
- * podemos descobrir automaticamente o TELEGRAM_CHAT_ID via getUpdates.
+ * descobre automaticamente o TELEGRAM_CHAT_ID via getUpdates.
  */
 export async function resolveTelegramChatId(botToken, currentChatId) {
   if (!botToken) return '';
@@ -75,6 +75,31 @@ export async function sendTelegramMessage(botToken, chatId, htmlText) {
   }
 }
 
+export function formatPaymentBreakdown(offer) {
+  const pay = offer.paymentInfo;
+  if (!pay) {
+    return `💰 <b>Preço:</b> <code>${formatBRL(offer.price)}</code>`;
+  }
+
+  const lines = [
+    `⚡ <b>À vista (PIX / Boleto):</b> <code>${formatBRL(pay.pixPrice)}</code>`,
+  ];
+
+  if (pay.cardTotal && pay.maxInstallments) {
+    lines.push(
+      `💳 <b>Parcelado no Cartão:</b> ${formatBRL(pay.cardTotal)} (em até <b>${
+        pay.maxInstallments
+      }x de ${formatBRL(pay.perInstallment)}</b> sem juros)`
+    );
+  }
+
+  if (pay.couponCode) {
+    lines.push(`🎟️ <b>CUPOM:</b> <code>${escapeHtml(pay.couponCode)}</code>`);
+  }
+
+  return lines.join('\n');
+}
+
 export function buildOfferAlertMessage(offer, evaluation) {
   const emoji = offer.edition === 'digital' ? '🎮' : '💿';
   const savingsText =
@@ -83,17 +108,59 @@ export function buildOfferAlertMessage(offer, evaluation) {
       : `🎯 <b>Atingiu exatamente sua meta!</b>`;
 
   return [
-    `🚨 <b>ALERTA DE PREÇO PS5!</b> ${emoji}`,
+    `🚨 <b>ALERTA DE PREÇO PS5 (EM ESTOQUE)!</b> ${emoji}`,
     ``,
     `📦 <b>${escapeHtml(offer.title)}</b>`,
     `🏷️ <b>Edição:</b> ${escapeHtml(offer.editionLabel)}`,
-    `🏪 <b>Loja:</b> ${escapeHtml(offer.store)}`,
+    `🏪 <b>Loja / Fonte:</b> ${escapeHtml(offer.store)}`,
     ``,
-    `💰 <b>Preço Encontrado:</b> <code>${formatBRL(offer.price)}</code>`,
+    formatPaymentBreakdown(offer),
     `🎯 <b>Sua Meta:</b> ${formatBRL(evaluation.targetPrice)}`,
     savingsText,
     ``,
     `🛒 <a href="${escapeHtml(offer.url)}">CLIQUE AQUI PARA ABRIR A OFERTA</a>`,
+  ].join('\n');
+}
+
+export function buildDailySummaryMessage(offers, config) {
+  const topDigital = offers
+    .filter((o) => o.edition === 'digital')
+    .sort((a, b) => a.price - b.price)
+    .slice(0, 3);
+
+  const topDisc = offers
+    .filter((o) => o.edition === 'disc')
+    .sort((a, b) => a.price - b.price)
+    .slice(0, 3);
+
+  const formatList = (list) => {
+    if (list.length === 0) return `   <i>Nenhuma oferta em estoque nesta categoria agora.</i>`;
+    return list
+      .map((o, idx) => {
+        const pay = o.paymentInfo;
+        const cardText =
+          pay && pay.cardTotal
+            ? ` | 💳 ${pay.maxInstallments}x ${formatBRL(pay.perInstallment)}`
+            : '';
+        const couponText = pay?.couponCode ? ` | 🎟️ Cupom: <code>${pay.couponCode}</code>` : '';
+        return `   ${idx + 1}. <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponText}\n      🏪 ${escapeHtml(
+          o.store
+        )} — <a href="${escapeHtml(o.url)}">Abrir Loja</a>`;
+      })
+      .join('\n');
+  };
+
+  return [
+    `📊 <b>RESUMO DIÁRIO DE PREÇOS PS5 SLIM</b>`,
+    `<i>Seu robô está 100% ativo monitorando em segundo plano!</i>`,
+    ``,
+    `🎮 <b>TOP 3 PS5 Slim Digital (Sua Meta: ${formatBRL(config.targetPriceDigital)}):</b>`,
+    formatList(topDigital),
+    ``,
+    `💿 <b>TOP 3 PS5 Slim Com Disco (Sua Meta: ${formatBRL(config.targetPriceDisc)}):</b>`,
+    formatList(topDisc),
+    ``,
+    `💡 <i>Envie /buscar a qualquer momento para forçar uma varredura ou /resumo para ver este ranking.</i>`,
   ].join('\n');
 }
 

@@ -32,7 +32,11 @@ export function getConfig() {
     targetPriceDisc: Number(process.env.TARGET_PRICE_DISC || 4000),
     minConsolePrice: Number(process.env.MIN_CONSOLE_PRICE || 2400),
     minPriceDropReais: Number(process.env.MIN_PRICE_DROP_REAIS || 50),
-    checkIntervalMinutes: Number(process.env.CHECK_INTERVAL_MINUTES || 60),
+    dailySummaryHours: (process.env.DAILY_SUMMARY_HOURS || '12,20')
+      .split(',')
+      .map((h) => Number(h.trim()))
+      .filter((h) => !Number.isNaN(h)),
+    checkIntervalMinutes: Number(process.env.CHECK_INTERVAL_MINUTES || 10),
     port: Number(process.env.PORT || 3055),
   };
 }
