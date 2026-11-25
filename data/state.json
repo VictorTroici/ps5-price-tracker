@@ -1,74 +1,7 @@
 {
-  "lastScanAt": "2026-11-25T16:35:24.306Z",
+  "lastScanAt": "2026-11-25T16:40:32.382Z",
   "lastDailySummarySlot": "2026-11-25-12h",
-  "offers": [
-    {
-      "id": "kabum-989702",
-      "store": "KaBuM!",
-      "title": "Console Sony PlayStation 5, SSD 825GB, Controle Sem Fio DualSense + 2 Jogos Digitais, Edição Digital",
-      "price": 4649.07,
-      "edition": "digital",
-      "editionLabel": "PS5 Slim Digital (Sem Disco)",
-      "url": "https://www.kabum.com.br/produto/989702/console-sony-playstation-5-ssd-825gb-controle-sem-fio-dualsense-2-jogos-digitais-edicao-digital",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 4649.07,
-        "cardTotal": 4893.76,
-        "maxInstallments": 10,
-        "perInstallment": 489.38,
-        "hasPixDiscount": true,
-        "paymentMethodLabel": "À vista no PIX (10% OFF)",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "next_data",
-      "checkedAt": "2026-11-25T16:35:23.481Z"
-    },
-    {
-      "id": "kabum-934759",
-      "store": "KaBuM!",
-      "title": "Console Sony PlayStation 5, Com Leitor de Discos, SSD 1TB, Controle Sem Fio DualSense + 2 Jogos",
-      "price": 5114.07,
-      "edition": "disc",
-      "editionLabel": "PS5 Slim Com Leitor de Disco",
-      "url": "https://www.kabum.com.br/produto/934759/console-sony-playstation-5-com-leitor-de-discos-ssd-1tb-controle-sem-fio-dualsense-2-jogos",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5114.07,
-        "cardTotal": 5383.23,
-        "maxInstallments": 10,
-        "perInstallment": 538.32,
-        "hasPixDiscount": true,
-        "paymentMethodLabel": "À vista no PIX (10% OFF)",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "next_data",
-      "checkedAt": "2026-11-25T16:35:23.481Z"
-    },
-    {
-      "id": "kabum-636960",
-      "store": "KaBuM!",
-      "title": "Console PlayStation 5 Pro Sony, SSD 2TB, Com Controle Sem Fio DualSense, Branco - 1000046552",
-      "price": 7999,
-      "edition": "pro",
-      "editionLabel": "PS5 Pro",
-      "url": "https://www.kabum.com.br/produto/636960/console-playstation-5-pro-sony-ssd-2tb-com-controle-sem-fio-dualsense-branco-1000046552",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 7999,
-        "cardTotal": 7999,
-        "maxInstallments": 10,
-        "perInstallment": 799.9,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista no PIX (10% OFF)",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "next_data",
-      "checkedAt": "2026-11-25T16:35:23.481Z"
-    }
-  ],
+  "offers": [],
   "notifiedPrices": {
     "custom-aHR0cHM6Ly93d3": 3719.07
   },
@@ -129,7 +62,7 @@
     },
     "kabum": {
       "ok": true,
-      "count": 3
+      "count": 0
     },
     "amazon": {
       "ok": true,
