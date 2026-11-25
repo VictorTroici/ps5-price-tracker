@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T00:51:16.156Z",
+  "lastScanAt": "2026-11-25T00:55:19.176Z",
   "lastDailySummarySlot": null,
   "offers": [
     {
@@ -22,7 +22,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:51:14.178Z"
+      "checkedAt": "2026-11-25T00:55:17.158Z"
     },
     {
       "id": "amz-B0FX62Z7LK",
@@ -44,7 +44,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.341Z"
+      "checkedAt": "2026-11-25T00:55:17.483Z"
     },
     {
       "id": "amz-B0FTRYCKT1",
@@ -66,7 +66,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.341Z"
+      "checkedAt": "2026-11-25T00:55:17.483Z"
     },
     {
       "id": "amz-B0CN5RCWDD",
@@ -88,7 +88,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.345Z"
+      "checkedAt": "2026-11-25T00:55:17.487Z"
     },
     {
       "id": "amz-B0GBYZ4R2K",
@@ -110,7 +110,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.342Z"
+      "checkedAt": "2026-11-25T00:55:17.483Z"
     },
     {
       "id": "amz-B0H6LVH152",
@@ -132,7 +132,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.340Z"
+      "checkedAt": "2026-11-25T00:55:17.482Z"
     },
     {
       "id": "kabum-934759",
@@ -154,7 +154,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:51:14.178Z"
+      "checkedAt": "2026-11-25T00:55:17.158Z"
     },
     {
       "id": "amz-B0CM9VHGY7",
@@ -176,7 +176,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.342Z"
+      "checkedAt": "2026-11-25T00:55:17.484Z"
     },
     {
       "id": "amz-B0CKZGY5B6",
@@ -198,7 +198,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.342Z"
+      "checkedAt": "2026-11-25T00:55:17.484Z"
     },
     {
       "id": "amz-B0HN8L7Q46",
@@ -220,7 +220,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.342Z"
+      "checkedAt": "2026-11-25T00:55:17.483Z"
     },
     {
       "id": "amz-B0H6LPVFWQ",
@@ -242,7 +242,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.341Z"
+      "checkedAt": "2026-11-25T00:55:17.483Z"
     },
     {
       "id": "amz-B09FGC9T19",
@@ -264,7 +264,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.346Z"
+      "checkedAt": "2026-11-25T00:55:17.488Z"
     },
     {
       "id": "amz-B0DHSSVDGM",
@@ -286,7 +286,7 @@
         "cashbackInfo": null
       },
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:51:14.343Z"
+      "checkedAt": "2026-11-25T00:55:17.484Z"
     },
     {
       "id": "kabum-636960",
@@ -308,7 +308,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:51:14.179Z"
+      "checkedAt": "2026-11-25T00:55:17.158Z"
     }
   ],
   "notifiedPrices": {
