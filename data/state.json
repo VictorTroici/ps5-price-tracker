@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T00:57:26.748Z",
+  "lastScanAt": "2026-11-25T01:00:32.857Z",
   "lastDailySummarySlot": null,
   "offers": [
     {
@@ -22,7 +22,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:57:26.245Z"
+      "checkedAt": "2026-11-25T01:00:30.810Z"
     },
     {
       "id": "kabum-934759",
@@ -44,7 +44,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:57:26.245Z"
+      "checkedAt": "2026-11-25T01:00:30.810Z"
     },
     {
       "id": "kabum-636960",
@@ -66,7 +66,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:57:26.245Z"
+      "checkedAt": "2026-11-25T01:00:30.810Z"
     }
   ],
   "notifiedPrices": {
