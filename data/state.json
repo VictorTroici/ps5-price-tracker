@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T18:50:37.562Z",
+  "lastScanAt": "2026-11-25T18:55:27.442Z",
   "lastDailySummarySlot": "2026-11-25-12h",
   "offers": [
     {
@@ -22,7 +22,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T18:50:35.930Z"
+      "checkedAt": "2026-11-25T18:55:25.884Z"
     },
     {
       "id": "kabum-934759",
@@ -44,7 +44,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T18:50:35.930Z"
+      "checkedAt": "2026-11-25T18:55:25.884Z"
     },
     {
       "id": "kabum-636960",
@@ -66,7 +66,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T18:50:35.930Z"
+      "checkedAt": "2026-11-25T18:55:25.884Z"
     }
   ],
   "notifiedPrices": {
@@ -78,21 +78,21 @@
       "maxPrice": 4649.07,
       "lastPrice": 4649.07,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-25T18:50:37.562Z"
+      "updatedAt": "2026-11-25T18:55:27.442Z"
     },
     "kabum-934759": {
       "minPrice": 5114.07,
       "maxPrice": 5114.07,
       "lastPrice": 5114.07,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-25T18:50:37.562Z"
+      "updatedAt": "2026-11-25T18:55:27.442Z"
     },
     "kabum-636960": {
       "minPrice": 7999,
       "maxPrice": 7999,
       "lastPrice": 7999,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-25T18:50:37.562Z"
+      "updatedAt": "2026-11-25T18:55:27.442Z"
     }
   },
   "alertHistory": [
