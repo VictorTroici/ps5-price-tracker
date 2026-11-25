@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T00:55:19.176Z",
+  "lastScanAt": "2026-11-25T00:57:26.748Z",
   "lastDailySummarySlot": null,
   "offers": [
     {
@@ -22,117 +22,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:55:17.158Z"
-    },
-    {
-      "id": "amz-B0FX62Z7LK",
-      "store": "Amazon Brasil",
-      "title": "Sony PlayStation 5 Slim Digital Edition Console - 825GB - Middle East Version",
-      "price": 4654.9,
-      "edition": "digital",
-      "editionLabel": "PS5 Slim Digital (Sem Disco)",
-      "url": "https://www.amazon.com.br/dp/B0FX62Z7LK",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 4654.9,
-        "cardTotal": 4654.9,
-        "maxInstallments": 10,
-        "perInstallment": 465.49,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.483Z"
-    },
-    {
-      "id": "amz-B0FTRYCKT1",
-      "store": "Amazon Brasil",
-      "title": "Sony PlayStation 5 Slim Digital Console 825GB - International Version",
-      "price": 4654.9,
-      "edition": "digital",
-      "editionLabel": "PS5 Slim Digital (Sem Disco)",
-      "url": "https://www.amazon.com.br/dp/B0FTRYCKT1",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 4654.9,
-        "cardTotal": 4654.9,
-        "maxInstallments": 10,
-        "perInstallment": 465.49,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.483Z"
-    },
-    {
-      "id": "amz-B0CN5RCWDD",
-      "store": "Amazon Brasil",
-      "title": "PlayStation 5 Disc Console (New 2023 Slim Model)- UAE Version, 1 Year Manufacturer Warranty",
-      "price": 4749.9,
-      "edition": "disc",
-      "editionLabel": "PS5 Console (Verificar Edição no Link)",
-      "url": "https://www.amazon.com.br/dp/B0CN5RCWDD",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 4749.9,
-        "cardTotal": 4749.9,
-        "maxInstallments": 10,
-        "perInstallment": 474.99,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.487Z"
-    },
-    {
-      "id": "amz-B0GBYZ4R2K",
-      "store": "Amazon Brasil",
-      "title": "Console Playstation 5 Slim Disk + Controle DualSense lacrado",
-      "price": 4939.9,
-      "edition": "disc",
-      "editionLabel": "PS5 Console (Verificar Edição no Link)",
-      "url": "https://www.amazon.com.br/dp/B0GBYZ4R2K",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 4939.9,
-        "cardTotal": 4939.9,
-        "maxInstallments": 10,
-        "perInstallment": 493.99,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.483Z"
-    },
-    {
-      "id": "amz-B0H6LVH152",
-      "store": "Amazon Brasil",
-      "title": "Bundle GTA VI + PlayStation 5 Slim Digital 825 GB - Pacote Astro Bot e Gran Turismo 7",
-      "price": 5048.9,
-      "edition": "digital",
-      "editionLabel": "PS5 Slim Digital (Sem Disco)",
-      "url": "https://www.amazon.com.br/dp/B0H6LVH152",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5048.9,
-        "cardTotal": 5048.9,
-        "maxInstallments": 10,
-        "perInstallment": 504.89,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.482Z"
+      "checkedAt": "2026-11-25T00:57:26.245Z"
     },
     {
       "id": "kabum-934759",
@@ -154,139 +44,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:55:17.158Z"
-    },
-    {
-      "id": "amz-B0CM9VHGY7",
-      "store": "Amazon Brasil",
-      "title": "PlayStation 5 Standard (Slim)",
-      "price": 5129.9,
-      "edition": "disc",
-      "editionLabel": "PS5 Slim Com Leitor de Disco",
-      "url": "https://www.amazon.com.br/dp/B0CM9VHGY7",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5129.9,
-        "cardTotal": 5129.9,
-        "maxInstallments": 10,
-        "perInstallment": 512.99,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.484Z"
-    },
-    {
-      "id": "amz-B0CKZGY5B6",
-      "store": "Amazon Brasil",
-      "title": "Sony PlayStation 5 Slim 1TB Spider-Man 2",
-      "price": 5224.9,
-      "edition": "disc",
-      "editionLabel": "PS5 Console (Verificar Edição no Link)",
-      "url": "https://www.amazon.com.br/dp/B0CKZGY5B6",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5224.9,
-        "cardTotal": 5224.9,
-        "maxInstallments": 10,
-        "perInstallment": 522.49,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.484Z"
-    },
-    {
-      "id": "amz-B0HN8L7Q46",
-      "store": "Amazon Brasil",
-      "title": "Bundle Marvel's Wolverine + PlayStation 5 Slim Disk - Pacote Astro Bot e Gran Turismo 7",
-      "price": 5376,
-      "edition": "disc",
-      "editionLabel": "PS5 Console (Verificar Edição no Link)",
-      "url": "https://www.amazon.com.br/dp/B0HN8L7Q46",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5376,
-        "cardTotal": 5376,
-        "maxInstallments": 10,
-        "perInstallment": 537.6,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.483Z"
-    },
-    {
-      "id": "amz-B0H6LPVFWQ",
-      "store": "Amazon Brasil",
-      "title": "Bundle GTA VI + PlayStation 5 Slim Disk Pacote Astro Bot e Gran Turismo 7",
-      "price": 5548.9,
-      "edition": "disc",
-      "editionLabel": "PS5 Console (Verificar Edição no Link)",
-      "url": "https://www.amazon.com.br/dp/B0H6LPVFWQ",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5548.9,
-        "cardTotal": 5548.9,
-        "maxInstallments": 10,
-        "perInstallment": 554.89,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.483Z"
-    },
-    {
-      "id": "amz-B09FGC9T19",
-      "store": "Amazon Brasil",
-      "title": "Console PlayStation 5",
-      "price": 5699.9,
-      "edition": "disc",
-      "editionLabel": "PS5 Console (Verificar Edição no Link)",
-      "url": "https://www.amazon.com.br/dp/B09FGC9T19",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 5699.9,
-        "cardTotal": 5699.9,
-        "maxInstallments": 10,
-        "perInstallment": 569.99,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.488Z"
-    },
-    {
-      "id": "amz-B0DHSSVDGM",
-      "store": "Amazon Brasil",
-      "title": "PlayStation 5 Edição Slim Digital - Bundle edição limitada do 30º aniversário",
-      "price": 6749.9,
-      "edition": "digital",
-      "editionLabel": "PS5 Slim Digital (Sem Disco)",
-      "url": "https://www.amazon.com.br/dp/B0DHSSVDGM",
-      "inStock": true,
-      "paymentInfo": {
-        "pixPrice": 6749.9,
-        "cardTotal": 6749.9,
-        "maxInstallments": 10,
-        "perInstallment": 674.99,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "couponCode": null,
-        "cashbackInfo": null
-      },
-      "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:55:17.484Z"
+      "checkedAt": "2026-11-25T00:57:26.245Z"
     },
     {
       "id": "kabum-636960",
@@ -308,7 +66,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:55:17.158Z"
+      "checkedAt": "2026-11-25T00:57:26.245Z"
     }
   ],
   "notifiedPrices": {
@@ -352,7 +110,7 @@
     },
     "amazon": {
       "ok": true,
-      "count": 11
+      "count": 0
     },
     "communityDeals": {
       "ok": true,
