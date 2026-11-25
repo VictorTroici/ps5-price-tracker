@@ -1,0 +1,39 @@
+name: Monitor de Precos PS5 Slim
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [cron-check]
+
+permissions:
+  contents: write
+
+jobs:
+  check-ps5-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Executar varredura de preços e enviar alerta no Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TARGET_PRICE_DIGITAL: ${{ vars.TARGET_PRICE_DIGITAL || '3800' }}
+          TARGET_PRICE_DISC: ${{ vars.TARGET_PRICE_DISC || '4000' }}
+          MIN_CONSOLE_PRICE: '2400'
+          MIN_PRICE_DROP_REAIS: '50'
+        run: node src/index.js --once
+
+      - name: Salvar histórico de preços notificados (evita alertas repetidos)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/state.json
+          git diff --staged --quiet || git commit -m "chore: atualiza estado de precos verificados [skip ci]"
+          git push
