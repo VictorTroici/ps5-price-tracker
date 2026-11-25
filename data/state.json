@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T00:12:57.127Z",
+  "lastScanAt": "2026-11-25T00:40:06.031Z",
   "offers": [
     {
       "id": "kabum-989702",
@@ -11,7 +11,67 @@
       "url": "https://www.kabum.com.br/produto/989702/console-sony-playstation-5-ssd-825gb-controle-sem-fio-dualsense-2-jogos-digitais-edicao-digital",
       "inStock": true,
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:12:56.069Z"
+      "checkedAt": "2026-11-25T00:40:04.935Z"
+    },
+    {
+      "id": "amz-B0FX62Z7LK",
+      "store": "Amazon Brasil",
+      "title": "Sony PlayStation 5 Slim Digital Edition Console - 825GB - Middle East Version",
+      "price": 4654.9,
+      "edition": "digital",
+      "editionLabel": "PS5 Slim Digital (Sem Disco)",
+      "url": "https://www.amazon.com.br/dp/B0FX62Z7LK",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.357Z"
+    },
+    {
+      "id": "amz-B0FTRYCKT1",
+      "store": "Amazon Brasil",
+      "title": "Sony PlayStation 5 Slim Digital Console 825GB - International Version",
+      "price": 4654.9,
+      "edition": "digital",
+      "editionLabel": "PS5 Slim Digital (Sem Disco)",
+      "url": "https://www.amazon.com.br/dp/B0FTRYCKT1",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.357Z"
+    },
+    {
+      "id": "amz-B0CN5RCWDD",
+      "store": "Amazon Brasil",
+      "title": "PlayStation 5 Disc Console (New 2023 Slim Model)- UAE Version, 1 Year Manufacturer Warranty",
+      "price": 4749.9,
+      "edition": "disc",
+      "editionLabel": "PS5 Console (Verificar Edição no Link)",
+      "url": "https://www.amazon.com.br/dp/B0CN5RCWDD",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.359Z"
+    },
+    {
+      "id": "amz-B0GBYZ4R2K",
+      "store": "Amazon Brasil",
+      "title": "Console Playstation 5 Slim Disk + Controle DualSense lacrado",
+      "price": 4939.9,
+      "edition": "disc",
+      "editionLabel": "PS5 Console (Verificar Edição no Link)",
+      "url": "https://www.amazon.com.br/dp/B0GBYZ4R2K",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.357Z"
+    },
+    {
+      "id": "amz-B0H6LVH152",
+      "store": "Amazon Brasil",
+      "title": "Bundle GTA VI + PlayStation 5 Slim Digital 825 GB - Pacote Astro Bot e Gran Turismo 7",
+      "price": 5048.9,
+      "edition": "digital",
+      "editionLabel": "PS5 Slim Digital (Sem Disco)",
+      "url": "https://www.amazon.com.br/dp/B0H6LVH152",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.356Z"
     },
     {
       "id": "kabum-934759",
@@ -23,7 +83,67 @@
       "url": "https://www.kabum.com.br/produto/934759/console-sony-playstation-5-com-leitor-de-discos-ssd-1tb-controle-sem-fio-dualsense-2-jogos",
       "inStock": true,
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:12:56.069Z"
+      "checkedAt": "2026-11-25T00:40:04.935Z"
+    },
+    {
+      "id": "amz-B0CM9VHGY7",
+      "store": "Amazon Brasil",
+      "title": "PlayStation 5 Standard (Slim)",
+      "price": 5129.9,
+      "edition": "disc",
+      "editionLabel": "PS5 Slim Com Leitor de Disco",
+      "url": "https://www.amazon.com.br/dp/B0CM9VHGY7",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.358Z"
+    },
+    {
+      "id": "amz-B0CKZGY5B6",
+      "store": "Amazon Brasil",
+      "title": "Sony PlayStation 5 Slim 1TB Spider-Man 2",
+      "price": 5224.9,
+      "edition": "disc",
+      "editionLabel": "PS5 Console (Verificar Edição no Link)",
+      "url": "https://www.amazon.com.br/dp/B0CKZGY5B6",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.358Z"
+    },
+    {
+      "id": "amz-B0H6LPVFWQ",
+      "store": "Amazon Brasil",
+      "title": "Bundle GTA VI + PlayStation 5 Slim Disk Pacote Astro Bot e Gran Turismo 7",
+      "price": 5548.9,
+      "edition": "disc",
+      "editionLabel": "PS5 Console (Verificar Edição no Link)",
+      "url": "https://www.amazon.com.br/dp/B0H6LPVFWQ",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.357Z"
+    },
+    {
+      "id": "amz-B09FGC9T19",
+      "store": "Amazon Brasil",
+      "title": "Console PlayStation 5",
+      "price": 5699.9,
+      "edition": "disc",
+      "editionLabel": "PS5 Console (Verificar Edição no Link)",
+      "url": "https://www.amazon.com.br/dp/B09FGC9T19",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.360Z"
+    },
+    {
+      "id": "amz-B0DHSSVDGM",
+      "store": "Amazon Brasil",
+      "title": "PlayStation 5 Edição Slim Digital - Bundle edição limitada do 30º aniversário",
+      "price": 6749.9,
+      "edition": "digital",
+      "editionLabel": "PS5 Slim Digital (Sem Disco)",
+      "url": "https://www.amazon.com.br/dp/B0DHSSVDGM",
+      "inStock": true,
+      "sourceType": "scraper",
+      "checkedAt": "2026-11-25T00:40:05.359Z"
     },
     {
       "id": "kabum-636960",
@@ -35,7 +155,7 @@
       "url": "https://www.kabum.com.br/produto/636960/console-playstation-5-pro-sony-ssd-2tb-com-controle-sem-fio-dualsense-branco-1000046552",
       "inStock": true,
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:12:56.069Z"
+      "checkedAt": "2026-11-25T00:40:04.935Z"
     }
   ],
   "notifiedPrices": {
@@ -79,7 +199,7 @@
     },
     "amazon": {
       "ok": true,
-      "count": 0
+      "count": 10
     },
     "aggregators": {
       "ok": true,
