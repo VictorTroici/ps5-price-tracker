@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T00:40:06.031Z",
+  "lastScanAt": "2026-11-25T00:45:20.835Z",
   "offers": [
     {
       "id": "kabum-989702",
@@ -11,7 +11,7 @@
       "url": "https://www.kabum.com.br/produto/989702/console-sony-playstation-5-ssd-825gb-controle-sem-fio-dualsense-2-jogos-digitais-edicao-digital",
       "inStock": true,
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:40:04.935Z"
+      "checkedAt": "2026-11-25T00:45:19.914Z"
     },
     {
       "id": "amz-B0FX62Z7LK",
@@ -23,7 +23,7 @@
       "url": "https://www.amazon.com.br/dp/B0FX62Z7LK",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.357Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "amz-B0FTRYCKT1",
@@ -35,7 +35,7 @@
       "url": "https://www.amazon.com.br/dp/B0FTRYCKT1",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.357Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "amz-B0CN5RCWDD",
@@ -47,7 +47,7 @@
       "url": "https://www.amazon.com.br/dp/B0CN5RCWDD",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.359Z"
+      "checkedAt": "2026-11-25T00:45:20.082Z"
     },
     {
       "id": "amz-B0GBYZ4R2K",
@@ -59,7 +59,7 @@
       "url": "https://www.amazon.com.br/dp/B0GBYZ4R2K",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.357Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "amz-B0H6LVH152",
@@ -71,7 +71,7 @@
       "url": "https://www.amazon.com.br/dp/B0H6LVH152",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.356Z"
+      "checkedAt": "2026-11-25T00:45:20.079Z"
     },
     {
       "id": "kabum-934759",
@@ -83,7 +83,7 @@
       "url": "https://www.kabum.com.br/produto/934759/console-sony-playstation-5-com-leitor-de-discos-ssd-1tb-controle-sem-fio-dualsense-2-jogos",
       "inStock": true,
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:40:04.935Z"
+      "checkedAt": "2026-11-25T00:45:19.914Z"
     },
     {
       "id": "amz-B0CM9VHGY7",
@@ -95,7 +95,7 @@
       "url": "https://www.amazon.com.br/dp/B0CM9VHGY7",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.358Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "amz-B0CKZGY5B6",
@@ -107,7 +107,7 @@
       "url": "https://www.amazon.com.br/dp/B0CKZGY5B6",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.358Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "amz-B0H6LPVFWQ",
@@ -119,7 +119,7 @@
       "url": "https://www.amazon.com.br/dp/B0H6LPVFWQ",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.357Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "amz-B09FGC9T19",
@@ -131,7 +131,7 @@
       "url": "https://www.amazon.com.br/dp/B09FGC9T19",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.360Z"
+      "checkedAt": "2026-11-25T00:45:20.082Z"
     },
     {
       "id": "amz-B0DHSSVDGM",
@@ -143,7 +143,7 @@
       "url": "https://www.amazon.com.br/dp/B0DHSSVDGM",
       "inStock": true,
       "sourceType": "scraper",
-      "checkedAt": "2026-11-25T00:40:05.359Z"
+      "checkedAt": "2026-11-25T00:45:20.080Z"
     },
     {
       "id": "kabum-636960",
@@ -155,7 +155,7 @@
       "url": "https://www.kabum.com.br/produto/636960/console-playstation-5-pro-sony-ssd-2tb-com-controle-sem-fio-dualsense-branco-1000046552",
       "inStock": true,
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T00:40:04.935Z"
+      "checkedAt": "2026-11-25T00:45:19.914Z"
     }
   ],
   "notifiedPrices": {
