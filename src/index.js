@@ -157,128 +157,118 @@ export async function runScanAndNotify() {
 }
 
 /**
- * Escuta comandos enviados pelo usuário diretamente no bot do Telegram:
- * /start ou /status -> Mostra o resumo e os menores preços atuais (PIX e Cartão)
- * /resumo -> Envia o TOP 3 ofertas Digital e Com Disco na hora
- * /buscar -> Faz uma busca imediata em todas as lojas e responde no Telegram
- * /meta 3700 3900 -> Altera a meta do Digital e Com Disco direto pelo Telegram
+ * Escuta comandos enviados pelo usuário diretamente no bot do Telegram.
+ * IMPORTANTE: Salva o lastTelegramUpdateId no state.json e confirma o offset na API do Telegram!
+ * Sem isso, quando roda no GitHub Actions a cada 10 min, o Telegram devolvia o mesmo /buscar antigo
+ * em toda execução, causando mensagens repetidas da KaBuM!
  */
-let lastUpdateId = 0;
 async function pollTelegramCommands() {
   const config = getConfig();
   if (!config.telegramBotToken) return;
 
   try {
-    const url = `https://api.telegram.org/bot${config.telegramBotToken}/getUpdates?offset=${
-      lastUpdateId + 1
-    }&timeout=1`;
+    const nextOffset = (currentState.lastTelegramUpdateId || 0) + 1;
+    const url = `https://api.telegram.org/bot${config.telegramBotToken}/getUpdates?offset=${nextOffset}&timeout=1`;
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
     if (!res.ok) return;
     const data = await res.json();
-    if (!data.ok || !Array.isArray(data.result)) return;
+    if (!data.ok || !Array.isArray(data.result) || data.result.length === 0) return;
 
+    // Pega apenas a última mensagem enviada nas últimas 2 horas (evita reprocessar fila velha)
+    let latestUpdate = null;
     for (const update of data.result) {
-      if (update.update_id > lastUpdateId) {
-        lastUpdateId = update.update_id;
+      if (update.update_id > (currentState.lastTelegramUpdateId || 0)) {
+        currentState.lastTelegramUpdateId = update.update_id;
       }
-      const msg = update.message;
-      const chatId = msg?.chat?.id ? String(msg.chat.id) : '';
-      const text = (msg?.text || '').trim();
-      if (!chatId || !text) continue;
+      latestUpdate = update;
+    }
 
-      const wasUnlinked = !config.telegramChatId;
-      if (wasUnlinked || config.telegramChatId !== chatId) {
-        updateEnvValues({ TELEGRAM_CHAT_ID: chatId });
+    // Confirma imediatamente na API do Telegram que já lemos até currentState.lastTelegramUpdateId
+    // Assim o próprio servidor do Telegram limpa a fila mesmo antes do git push!
+    await fetch(
+      `https://api.telegram.org/bot${config.telegramBotToken}/getUpdates?offset=${
+        currentState.lastTelegramUpdateId + 1
+      }&timeout=0`,
+      { signal: AbortSignal.timeout(4000) }
+    ).catch(() => {});
+
+    saveState(currentState);
+
+    if (!latestUpdate || !latestUpdate.message) return;
+
+    const msg = latestUpdate.message;
+    const msgAgeSeconds = Math.floor(Date.now() / 1000) - Number(msg.date || 0);
+    // Se a mensagem tiver mais de 15 minutos, apenas consome o offset sem responder de novo
+    if (msgAgeSeconds > 900) {
+      return;
+    }
+
+    const chatId = msg?.chat?.id ? String(msg.chat.id) : '';
+    const text = (msg?.text || '').trim();
+    if (!chatId || !text) return;
+
+    const wasUnlinked = !config.telegramChatId;
+    if (wasUnlinked || config.telegramChatId !== chatId) {
+      updateEnvValues({ TELEGRAM_CHAT_ID: chatId });
+    }
+
+    const lower = text.toLowerCase();
+
+    if (lower === '/start' || lower === 'oi' || lower === '/status') {
+      if (currentState.offers.length === 0) {
+        await runScanAndNotify();
       }
-
-      const lower = text.toLowerCase();
-
-      if (lower === '/start' || lower === 'oi' || lower === '/status') {
-        const bestDigital = currentState.offers
-          .filter((o) => o.edition === 'digital')
-          .sort((a, b) => a.price - b.price)[0];
-        const bestDisc = currentState.offers
-          .filter((o) => o.edition === 'disc')
-          .sort((a, b) => a.price - b.price)[0];
-
-        const formatBest = (o, label) => {
-          if (!o) return `${label}: Sem oferta em estoque`;
-          const pay = o.paymentInfo;
-          const cardStr =
-            pay && pay.cardTotal
-              ? ` | 💳 ${pay.maxInstallments}x de ${formatBRL(pay.perInstallment)}`
-              : '';
-          return `${label}: <b>${formatBRL(o.price)} no PIX</b>${cardStr} (${
-            o.store
-          }) — <a href="${o.url}">Ver</a>`;
-        };
-
-        const reply = [
-          `🤖 <b>Monitor Automático PS5 Slim Pro Ativo!</b>`,
-          ``,
-          `🏪 <b>Fontes monitoradas:</b> Amazon, KaBuM!, Mercado Livre (Lojas Oficiais), Magazine Luiza, Carrefour, Casas Bahia, Pelando, Promobit, Zoom e Buscapé.`,
-          `📊 <b>Resumo Diário Automático:</b> Todo dia às 12h e às 20h.`,
-          `🎯 <b>Sua Meta Digital:</b> ${formatBRL(config.targetPriceDigital)}`,
-          `🎯 <b>Sua Meta Com Disco:</b> ${formatBRL(config.targetPriceDisc)}`,
-          ``,
-          `🏆 <b>Menores preços EM ESTOQUE agora:</b>`,
-          formatBest(bestDigital, '🎮 Digital'),
-          formatBest(bestDisc, '💿 Com Disco'),
-          ``,
-          `💡 <b>Comandos no Telegram:</b>`,
-          `• /resumo — Envia o TOP 3 Digital e Com Disco agora`,
-          `• /buscar — Verifica todas as lojas agora mesmo`,
-          `• /status — Mostra os menores preços atuais`,
-          `• /meta 3700 3950 — Muda suas metas`,
-        ].join('\n');
-
-        await sendTelegramMessage(config.telegramBotToken, chatId, reply);
-      } else if (lower === '/resumo') {
-        if (currentState.offers.length === 0) {
-          await runScanAndNotify();
-        }
-        const summaryMsg = buildDailySummaryMessage(
-          currentState.offers,
-          config,
-          currentState.priceHistory
-        );
-        await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
-      } else if (lower === '/buscar') {
+      const summaryMsg = buildDailySummaryMessage(
+        currentState.offers,
+        config,
+        currentState.priceHistory
+      );
+      await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
+    } else if (lower === '/resumo') {
+      if (currentState.offers.length === 0) {
+        await runScanAndNotify();
+      }
+      const summaryMsg = buildDailySummaryMessage(
+        currentState.offers,
+        config,
+        currentState.priceHistory
+      );
+      await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
+    } else if (lower === '/buscar') {
+      await sendTelegramMessage(
+        config.telegramBotToken,
+        chatId,
+        `🔎 <b>Varrendo Amazon, KaBuM!, Magalu, Mercado Livre, Pelando e Promobit agora...</b>`
+      );
+      await runScanAndNotify();
+      const summaryMsg = buildDailySummaryMessage(
+        currentState.offers,
+        config,
+        currentState.priceHistory
+      );
+      await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
+    } else if (lower.startsWith('/meta')) {
+      const parts = lower.split(/\s+/);
+      const newDig = Number(parts[1]);
+      const newDisc = Number(parts[2]);
+      if (newDig > 2000 && newDisc > 2000) {
+        updateEnvValues({
+          TARGET_PRICE_DIGITAL: newDig,
+          TARGET_PRICE_DISC: newDisc,
+        });
         await sendTelegramMessage(
           config.telegramBotToken,
           chatId,
-          `🔎 <b>Varrendo todas as lojas, Pelando e Promobit agora...</b>`
+          `✅ <b>Novas metas salvas!</b>\n🎮 Digital: ${formatBRL(
+            newDig
+          )}\n💿 Com Disco: ${formatBRL(newDisc)}`
         );
-        await runScanAndNotify();
-        const summaryMsg = buildDailySummaryMessage(
-          currentState.offers,
-          config,
-          currentState.priceHistory
+      } else {
+        await sendTelegramMessage(
+          config.telegramBotToken,
+          chatId,
+          `ℹ️ Use o formato: <code>/meta 3700 3950</code>`
         );
-        await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
-      } else if (lower.startsWith('/meta')) {
-        const parts = lower.split(/\s+/);
-        const newDig = Number(parts[1]);
-        const newDisc = Number(parts[2]);
-        if (newDig > 2000 && newDisc > 2000) {
-          updateEnvValues({
-            TARGET_PRICE_DIGITAL: newDig,
-            TARGET_PRICE_DISC: newDisc,
-          });
-          await sendTelegramMessage(
-            config.telegramBotToken,
-            chatId,
-            `✅ <b>Novas metas salvas!</b>\n🎮 Digital: ${formatBRL(
-              newDig
-            )}\n💿 Com Disco: ${formatBRL(newDisc)}`
-          );
-        } else {
-          await sendTelegramMessage(
-            config.telegramBotToken,
-            chatId,
-            `ℹ️ Use o formato: <code>/meta 3700 3950</code>`
-          );
-        }
       }
     }
   } catch {

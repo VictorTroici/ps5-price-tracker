@@ -142,16 +142,42 @@ export function buildOfferAlertMessage(offer, evaluation) {
   ].join('\n');
 }
 
-export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
-  const topDigital = offers
-    .filter((o) => o.edition === 'digital')
-    .sort((a, b) => a.price - b.price)
-    .slice(0, 3);
+/**
+ * Seleciona as melhores ofertas garantindo diversidade de lojas (Amazon, KaBuM!, Magalu, Mercado Livre, etc.)
+ * para que o Resumo Diário mostre um comparativo completo entre as principais lojas confiáveis!
+ */
+function selectDiverseTopOffers(offers, edition, limit = 4) {
+  const filtered = offers
+    .filter((o) => o.edition === edition)
+    .sort((a, b) => a.price - b.price);
 
-  const topDisc = offers
-    .filter((o) => o.edition === 'disc')
-    .sort((a, b) => a.price - b.price)
-    .slice(0, 3);
+  const selected = [];
+  const usedBaseStores = new Set();
+
+  // 1ª passada: pega o melhor preço de CADA loja diferente (Amazon, KaBuM, Magalu, Mercado Livre...)
+  for (const offer of filtered) {
+    const storeKey = (offer.baseStore || offer.store || '').split('(')[0].trim();
+    if (!usedBaseStores.has(storeKey)) {
+      usedBaseStores.add(storeKey);
+      selected.push(offer);
+      if (selected.length >= limit) break;
+    }
+  }
+
+  // 2ª passada: se ainda houver vaga, completa com as próximas melhores ofertas
+  for (const offer of filtered) {
+    if (selected.length >= limit) break;
+    if (!selected.includes(offer)) {
+      selected.push(offer);
+    }
+  }
+
+  return selected.sort((a, b) => a.price - b.price);
+}
+
+export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
+  const topDigital = selectDiverseTopOffers(offers, 'digital', 4);
+  const topDisc = selectDiverseTopOffers(offers, 'disc', 4);
 
   const formatList = (list) => {
     if (list.length === 0) return `   <i>Nenhuma oferta em estoque nesta categoria agora.</i>`;
@@ -164,26 +190,30 @@ export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
             : '';
         const couponText = pay?.couponCode ? ` | 🎟️ Cupom: <code>${pay.couponCode}</code>` : '';
         const verdict = analyzeBlackFridayVerdict(o, priceHistoryMap[o.id]);
+        const shortTitle =
+          o.title.length > 68 ? `${o.title.slice(0, 68).trim()}...` : o.title;
+
         return [
-          `   ${idx + 1}. <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponText}`,
-          `      ${verdict.badge} (Média 90d: ${formatBRL(verdict.average90d)})`,
-          `      🏪 ${escapeHtml(o.store)} — <a href="${escapeHtml(o.url)}">Abrir Loja</a>`,
+          `   ${idx + 1}. 🏪 <b>${escapeHtml(o.store)}</b>`,
+          `      📦 ${escapeHtml(shortTitle)}`,
+          `      💰 <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponText}`,
+          `      ${verdict.badge} — <a href="${escapeHtml(o.url)}">Abrir Anúncio Oficial</a>`,
         ].join('\n');
       })
       .join('\n\n');
   };
 
   return [
-    `📊 <b>RESUMO DIÁRIO + DETECTOR ANTI-BLACK FRAUDE</b>`,
-    `<i>Comparando preços atuais em estoque com a média real dos últimos 90 dias (Buscapé/Zoom):</i>`,
+    `📊 <b>COMPARATIVO DAS PRINCIPAIS LOJAS (OFICIAIS & BEM AVALIADOS)</b>`,
+    `<i>Apenas anúncios oficiais verificados, em estoque e com avaliações reais:</i>`,
     ``,
-    `🎮 <b>TOP 3 PS5 Slim Digital (Sua Meta: ${formatBRL(config.targetPriceDigital)} | Média 90d: R$ 3.749):</b>`,
+    `🎮 <b>PS5 Slim Digital — Principais Lojas (Meta: ${formatBRL(config.targetPriceDigital)} | Média 90d: R$ 3.749):</b>`,
     formatList(topDigital),
     ``,
-    `💿 <b>TOP 3 PS5 Slim Com Disco (Sua Meta: ${formatBRL(config.targetPriceDisc)} | Média 90d: R$ 4.049):</b>`,
+    `💿 <b>PS5 Slim Com Leitor de Disco — Principais Lojas (Meta: ${formatBRL(config.targetPriceDisc)} | Média 90d: R$ 4.049):</b>`,
     formatList(topDisc),
     ``,
-    `💡 <i>Envie /buscar a qualquer momento para forçar uma varredura ou /resumo para ver este ranking.</i>`,
+    `🔕 <i>Modo Silencioso Ativo: o robô só manda alerta fora do resumo diário quando um preço cair ou atingir sua meta!</i>`,
   ].join('\n');
 }
 

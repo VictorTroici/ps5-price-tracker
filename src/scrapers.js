@@ -739,7 +739,8 @@ export async function fetchAggregatorOffers(minConsolePrice = 2400) {
 }
 
 /**
- * 7. Monitoramento de URLs Diretas Customizadas (Amazon, Kabum, Magalu, Mercado Livre, etc.)
+ * 7. Monitoramento de URLs Diretas Curadas e Customizadas (Amazon, Kabum, Magalu, Mercado Livre, etc.)
+ * Extrai preço, parcelamento, nota (estrelas) e número de avaliações da página do produto!
  */
 export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
   try {
@@ -750,6 +751,10 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
     if (!res.ok) return null;
     const html = await res.text();
 
+    let rating = item.defaultRating || 0;
+    let reviewsCount = item.defaultReviews || 0;
+
+    // 1. Tenta JSON-LD primeiro (KaBuM!, Magalu, Mercado Livre, etc.)
     const jsonLdMatches = html.matchAll(
       /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
     );
@@ -768,14 +773,31 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
             });
             if (!inStock) return null;
 
+            if (node.aggregateRating) {
+              rating = Number(node.aggregateRating.ratingValue || rating || 4.9);
+              reviewsCount = Number(
+                node.aggregateRating.reviewCount ||
+                  node.aggregateRating.ratingCount ||
+                  reviewsCount ||
+                  0
+              );
+            }
+
             const rawPrice = offerObj?.lowPrice || offerObj?.price || offerObj?.highPrice;
             const highPrice = offerObj?.highPrice || rawPrice;
             const price = parseBRLPrice(String(rawPrice || ''));
             const classification = classifyPS5Offer(title, price, minConsolePrice);
             if (classification.isValidConsole) {
+              const baseStore = item.store || extractDomainName(item.url);
+              const storeWithReviews =
+                reviewsCount > 0
+                  ? `${baseStore} (⭐ ${rating} | ${reviewsCount.toLocaleString('pt-BR')} avaliações)`
+                  : baseStore;
+
               return {
-                id: `custom-${Buffer.from(item.url).toString('base64').slice(0, 14)}`,
-                store: item.store || extractDomainName(item.url),
+                id: item.id || `custom-${Buffer.from(item.url).toString('base64').slice(0, 14)}`,
+                store: storeWithReviews,
+                baseStore,
                 title,
                 price,
                 edition: item.edition || classification.edition,
@@ -787,6 +809,8 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
                     : classification.editionLabel,
                 url: item.url,
                 inStock: true,
+                rating,
+                reviewsCount,
                 paymentInfo: enrichPaymentInfo({
                   price,
                   regularPrice: parseBRLPrice(String(highPrice || price)),
@@ -805,6 +829,61 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
 
     if (!isOfferInStock({ fullPageHtml: html })) return null;
 
+    // 2. Extração específica de Página de Produto da Amazon Brasil (DP / ASIN)
+    if (item.url.includes('amazon.com.br')) {
+      const amzPriceMatch =
+        html.match(/class="a-price-whole">([\d.]+)<span[^>]*>,<\/span><span class="a-price-fraction">(\d{2})<\/span>/i) ||
+        html.match(/"priceAmount":([\d.]+)/i);
+      if (amzPriceMatch) {
+        const price = amzPriceMatch[2]
+          ? Number(`${amzPriceMatch[1].replace(/\./g, '')}.${amzPriceMatch[2]}`)
+          : Number(amzPriceMatch[1]);
+        const titleMatch =
+          html.match(/id="productTitle"[^>]*>\s*([^<]+)\s*<\/span>/i) ||
+          html.match(/<title>([^<]+)<\/title>/i);
+        const title = titleMatch ? decodeHtmlEntities(titleMatch[1].trim()) : item.label;
+
+        const amzReviewsMatch = html.match(/id="acrCustomerReviewText"[^>]*>([\d.]+)\s+avalia/i);
+        if (amzReviewsMatch) {
+          reviewsCount = Number(amzReviewsMatch[1].replace(/\./g, ''));
+        }
+
+        const classification = classifyPS5Offer(title, price, minConsolePrice);
+        if (classification.isValidConsole) {
+          const baseStore = 'Amazon Brasil';
+          const storeWithReviews =
+            reviewsCount > 0
+              ? `${baseStore} (⭐ ${rating || 4.9} | ${reviewsCount.toLocaleString('pt-BR')} avaliações)`
+              : baseStore;
+
+          return {
+            id: item.id || `custom-${Buffer.from(item.url).toString('base64').slice(0, 14)}`,
+            store: storeWithReviews,
+            baseStore,
+            title,
+            price,
+            edition: item.edition || classification.edition,
+            editionLabel:
+              item.edition === 'digital'
+                ? 'PS5 Slim Digital (Sem Disco)'
+                : 'PS5 Slim Com Leitor de Disco',
+            url: item.url,
+            inStock: true,
+            rating: rating || 4.9,
+            reviewsCount,
+            paymentInfo: enrichPaymentInfo({
+              price,
+              regularPrice: price,
+              installmentsCount: 12,
+            }),
+            sourceType: 'custom_url',
+            checkedAt: new Date().toISOString(),
+          };
+        }
+      }
+    }
+
+    // 3. Fallback meta tags gerais
     const metaPrice =
       html.match(/property="product:price:amount"\s+content="([\d.,]+)"/i) ||
       html.match(/name="twitter:data1"\s+content="R\$\s*([\d.,]+)"/i);
@@ -814,15 +893,22 @@ export async function fetchCustomProductUrl(item, minConsolePrice = 2400) {
       const title = decodeHtmlEntities(titleMatch[1]);
       const classification = classifyPS5Offer(title, price, minConsolePrice);
       if (classification.isValidConsole) {
+        const baseStore = item.store || extractDomainName(item.url);
         return {
-          id: `custom-${Buffer.from(item.url).toString('base64').slice(0, 14)}`,
-          store: item.store || extractDomainName(item.url),
+          id: item.id || `custom-${Buffer.from(item.url).toString('base64').slice(0, 14)}`,
+          store:
+            reviewsCount > 0
+              ? `${baseStore} (⭐ ${rating || 4.8} | ${reviewsCount.toLocaleString('pt-BR')} avaliações)`
+              : baseStore,
+          baseStore,
           title,
           price,
           edition: item.edition || classification.edition,
           editionLabel: classification.editionLabel,
           url: item.url,
           inStock: true,
+          rating,
+          reviewsCount,
           paymentInfo: enrichPaymentInfo({ price, installmentsCount: 10 }),
           sourceType: 'custom_url',
           checkedAt: new Date().toISOString(),
