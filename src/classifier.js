@@ -33,6 +33,9 @@ const EXCLUDED_KEYWORDS = [
   'ps portal',
   'ps4',
   'playstation 4',
+  'vr2',
+  'playstation vr',
+  'ps vr2',
   'usado',
   'recondicionado',
   'vitrine',
@@ -50,6 +53,7 @@ const EXCLUDED_KEYWORDS = [
   'uk version',
   'eu version',
   'us version',
+  'ksa version',
   'asian version',
   'versao importada',
   'versão importada',
@@ -57,6 +61,7 @@ const EXCLUDED_KEYWORDS = [
   'bundle gta vi',
   'bundle marvel',
   'wolverine +',
+  'wolverine pacote',
 ];
 
 const CONSOLE_REQUIRED_KEYWORDS = [
@@ -110,7 +115,7 @@ export const MARKET_BENCHMARKS = {
     historicLowMax: 3350, // Menor preço histórico / Black Friday real
     inflatedMin: 3899, // Acima disso é preço cheio/inflado
     buscapeHistoryUrl:
-      'https://www.buscape.com.br/console-de-videogame/console-playstation-5-slim-digital-edicao-digital?_lc=88#historico-de-precos',
+      'https://www.buscape.com.br/console-de-video-game/console-playstation-5-slim-825gb-sony-ps5-edicao-digital-bundle-4k#_lc=88',
   },
   disc: {
     average90d: 4049, // Média normal dos últimos 90 dias fora de promoção
@@ -118,15 +123,14 @@ export const MARKET_BENCHMARKS = {
     historicLowMax: 3600, // Menor preço histórico / Black Friday real
     inflatedMin: 4199, // Acima disso é preço cheio/inflado
     buscapeHistoryUrl:
-      'https://www.buscape.com.br/console-de-videogame/console-playstation-5-slim-1tb-sony?_lc=88#historico-de-precos',
+      'https://www.buscape.com.br/console-de-video-game/playstation-5-slim-1tb-bundle-astro-bot-gran-turismo-7#_lc=88',
   },
   pro: {
     average90d: 6699,
     goodDealMax: 6299,
     historicLowMax: 5899,
     inflatedMin: 6999,
-    buscapeHistoryUrl:
-      'https://www.buscape.com.br/search?q=playstation+5+pro',
+    buscapeHistoryUrl: 'https://www.buscape.com.br/search?q=playstation+5+pro',
   },
 };
 
@@ -135,6 +139,18 @@ export function normalizeText(text = '') {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Retorna o preço líquido final efetivo (subtraindo cupom detectado do preço no PIX)
+ */
+export function getEffectivePrice(offer) {
+  if (typeof offer?.preco_final_efetivo === 'number' && !Number.isNaN(offer.preco_final_efetivo)) {
+    return offer.preco_final_efetivo;
+  }
+  const pixPrice = Number(offer?.paymentInfo?.pixPrice ?? offer?.price ?? 0);
+  const couponDiscount = Number(offer?.paymentInfo?.couponDiscount ?? offer?.couponDiscount ?? 0);
+  return Math.max(0, Number((pixPrice - couponDiscount).toFixed(2)));
 }
 
 /**
@@ -169,7 +185,7 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
   }
 
   const startsWithAccessory =
-    /^(controle|jogo|game|tampa|capa|suporte|headset|base|leitor de disco|unidade de disco|cabo|cooler|skin|adesivo)\b/i.test(
+    /^(controle|jogo|game|tampa|capa|suporte|headset|base|leitor de disco|unidade de disco|cabo|cooler|skin|adesivo|vr2)\b/i.test(
       norm.trim()
     );
   if (startsWithAccessory) {
@@ -222,45 +238,44 @@ export function classifyPS5Offer(title, price, minConsolePrice = 2400) {
 
 /**
  * Detector Anti-Black Fraude:
- * Compara o preço atual com a média histórica de 90 dias (Buscapé/Zoom) e com o histórico local salvo no state.json
+ * Usa SEMPRE o preco_final_efetivo (líquido após cupom) para comparar com a média histórica de 90 dias
  */
 export function analyzeBlackFridayVerdict(offer, priceHistoryRecord = null) {
   const bench = MARKET_BENCHMARKS[offer.edition] || MARKET_BENCHMARKS.disc;
-  const price = offer.price;
-  const diffFromAvg90d = bench.average90d - price;
+  const effectivePrice = getEffectivePrice(offer);
+  const diffFromAvg90d = bench.average90d - effectivePrice;
   const pctFromAvg90d = Math.round((diffFromAvg90d / bench.average90d) * 100);
 
-  // Detecta se a loja colocou um preço "De: R$ 5.200" mentiroso acima da média real de 90 dias
-  const claimedOriginal = offer.paymentInfo?.cardTotal || price;
-  const isFakeAnchor = claimedOriginal > bench.average90d + 450 && price > bench.goodDealMax;
+  const claimedOriginal = offer.paymentInfo?.cardTotal || offer.price;
+  const isFakeAnchor = claimedOriginal > bench.average90d + 450 && effectivePrice > bench.goodDealMax;
 
   let tier = 'normal';
   let badge = '🟡 PREÇO NORMAL DE MERCADO';
-  let explanation = `Está na faixa normal dos últimos 90 dias (Média histórica: R$ ${bench.average90d}).`;
+  let explanation = `Preço final (R$ ${effectivePrice.toFixed(2)}) está na faixa normal dos últimos 90 dias (Média histórica: R$ ${bench.average90d}).`;
 
-  if (price <= bench.historicLowMax) {
+  if (effectivePrice <= bench.historicLowMax) {
     tier = 'historic_low';
     badge = '🔥 PREÇO HISTÓRICO DE BLACK FRIDAY (VALE MUITO!)';
-    explanation = `Está R$ ${diffFromAvg90d.toFixed(0)} (${pctFromAvg90d}%) ABAIXO da média dos últimos 90 dias (R$ ${bench.average90d})! Desconto 100% real!`;
-  } else if (price <= bench.goodDealMax) {
+    explanation = `Preço líquido está R$ ${diffFromAvg90d.toFixed(0)} (${pctFromAvg90d}%) ABAIXO da média dos últimos 90 dias (R$ ${bench.average90d})! Desconto 100% real!`;
+  } else if (effectivePrice <= bench.goodDealMax) {
     tier = 'good_deal';
     badge = '🟢 PROMOÇÃO REAL (ABAIXO DA MÉDIA DE 90 DIAS)';
     explanation = `Economia real de R$ ${diffFromAvg90d.toFixed(0)} (${pctFromAvg90d}% menor que a média de 90 dias de R$ ${bench.average90d}).`;
-  } else if (price >= bench.inflatedMin) {
+  } else if (effectivePrice >= bench.inflatedMin) {
     tier = 'inflated';
     badge = isFakeAnchor
       ? '🚨 ALERTA BLACK FRAUDE (PREÇO INFLADO)'
       : '🔴 ACIMA DA MÉDIA DOS ÚLTIMOS 90 DIAS';
-    explanation = `Está R$ ${Math.abs(diffFromAvg90d).toFixed(0)} mais caro que a média normal de 90 dias (R$ ${bench.average90d}). Não vale a pena agora.`;
+    explanation = `Está R$ ${Math.abs(diffFromAvg90d).toFixed(0)} mais caro que a média normal de 90 dias (R$ ${bench.average90d}). Não vale a pena sem cupom.`;
   }
 
   let trackedStats = null;
   if (priceHistoryRecord && priceHistoryRecord.minPrice) {
     trackedStats = {
-      minSeen: Math.min(priceHistoryRecord.minPrice, price),
-      maxSeen: Math.max(priceHistoryRecord.maxPrice || price, price),
-      lastPrice: priceHistoryRecord.lastPrice || price,
-      isLowestEverSeenByBot: price <= priceHistoryRecord.minPrice,
+      minSeen: Math.min(priceHistoryRecord.minPrice, effectivePrice),
+      maxSeen: Math.max(priceHistoryRecord.maxPrice || effectivePrice, effectivePrice),
+      lastPrice: priceHistoryRecord.lastPrice || effectivePrice,
+      isLowestEverSeenByBot: effectivePrice <= priceHistoryRecord.minPrice,
     };
   }
 
@@ -268,6 +283,7 @@ export function analyzeBlackFridayVerdict(offer, priceHistoryRecord = null) {
     tier,
     badge,
     explanation,
+    effectivePrice,
     average90d: bench.average90d,
     diffFromAvg90d,
     pctFromAvg90d,
@@ -277,21 +293,38 @@ export function analyzeBlackFridayVerdict(offer, priceHistoryRecord = null) {
   };
 }
 
+/**
+ * Avalia se a oferta atingiu:
+ * 1) A meta direta (`isHit`: preco_final_efetivo <= target)
+ * 2) Ou a "Margem para Cupom" (`isNearTarget`: preco_final_efetivo <= target + couponMarginTolerance, padrão +R$ 300)
+ */
 export function evaluateTargetHit(offer, config, priceHistoryMap = {}) {
   const target =
     offer.edition === 'digital'
       ? config.targetPriceDigital
       : config.targetPriceDisc;
 
-  const isHit = offer.price <= target;
-  const diff = target - offer.price;
+  const marginTolerance = Number(config.couponMarginTolerance ?? 300);
+  const effectivePrice = getEffectivePrice(offer);
+
+  const isHit = effectivePrice <= target;
+  const isNearTarget = !isHit && effectivePrice <= target + marginTolerance;
+  const diff = target - effectivePrice; // positivo se abaixo da meta, negativo se acima
+  const amountAboveTarget = Math.max(0, Number((effectivePrice - target).toFixed(2)));
+
   const historyRecord = priceHistoryMap[offer.id] || null;
   const verdict = analyzeBlackFridayVerdict(offer, historyRecord);
 
   return {
     isHit,
+    isNearTarget,
+    shouldAlert: isHit || isNearTarget,
+    alertType: isHit ? 'TARGET_HIT' : isNearTarget ? 'COUPON_MARGIN' : 'NONE',
+    effectivePrice,
     targetPrice: target,
+    marginCeiling: target + marginTolerance,
     savingsFromTarget: diff,
+    amountAboveTarget,
     verdict,
   };
 }

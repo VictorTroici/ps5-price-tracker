@@ -30,13 +30,16 @@ export function getConfig() {
     telegramChatId: process.env.TELEGRAM_CHAT_ID || '',
     targetPriceDigital: Number(process.env.TARGET_PRICE_DIGITAL || 3800),
     targetPriceDisc: Number(process.env.TARGET_PRICE_DISC || 4000),
+    couponMarginTolerance: Number(process.env.COUPON_MARGIN_TOLERANCE || 300),
     minConsolePrice: Number(process.env.MIN_CONSOLE_PRICE || 2400),
     minPriceDropReais: Number(process.env.MIN_PRICE_DROP_REAIS || 50),
     dailySummaryHours: (process.env.DAILY_SUMMARY_HOURS || '12,20')
       .split(',')
       .map((h) => Number(h.trim()))
       .filter((h) => !Number.isNaN(h)),
-    checkIntervalMinutes: Number(process.env.CHECK_INTERVAL_MINUTES || 10),
+    checkIntervalMinutes: Number(process.env.CHECK_INTERVAL_MINUTES || 3),
+    jitterMinSeconds: Number(process.env.JITTER_MIN_SECONDS || 10),
+    jitterMaxSeconds: Number(process.env.JITTER_MAX_SECONDS || 30),
     port: Number(process.env.PORT || 3055),
   };
 }

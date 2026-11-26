@@ -1,5 +1,5 @@
 import { updateEnvValues } from './config.js';
-import { analyzeBlackFridayVerdict } from './classifier.js';
+import { analyzeBlackFridayVerdict, getEffectivePrice } from './classifier.js';
 
 export function formatBRL(value) {
   return new Intl.NumberFormat('pt-BR', {
@@ -78,13 +78,25 @@ export async function sendTelegramMessage(botToken, chatId, htmlText) {
 
 export function formatPaymentBreakdown(offer) {
   const pay = offer.paymentInfo;
+  const effectivePrice = getEffectivePrice(offer);
   if (!pay) {
-    return `💰 <b>Preço:</b> <code>${formatBRL(offer.price)}</code>`;
+    return `💰 <b>Preço Final:</b> <code>${formatBRL(effectivePrice)}</code>`;
   }
 
   const lines = [
     `⚡ <b>À vista (PIX / Boleto):</b> <code>${formatBRL(pay.pixPrice)}</code>`,
   ];
+
+  if (pay.couponDiscount > 0 || pay.couponCode) {
+    const discountPart =
+      pay.couponDiscount > 0 ? `-${formatBRL(pay.couponDiscount)}` : 'Disponível';
+    const codePart = pay.couponCode ? ` (Código: <code>${escapeHtml(pay.couponCode)}</code>)` : '';
+    lines.push(
+      `🎟️ <b>Cupom detectado:</b> ${discountPart}${codePart} | <b>Preço final: <code>${formatBRL(
+        effectivePrice
+      )}</code></b>`
+    );
+  }
 
   if (pay.cardTotal && pay.maxInstallments) {
     lines.push(
@@ -94,26 +106,31 @@ export function formatPaymentBreakdown(offer) {
     );
   }
 
-  if (pay.couponCode) {
-    lines.push(`🎟️ <b>CUPOM:</b> <code>${escapeHtml(pay.couponCode)}</code>`);
-  }
-
   return lines.join('\n');
 }
 
 export function buildOfferAlertMessage(offer, evaluation) {
   const emoji = offer.edition === 'digital' ? '🎮' : '💿';
-  const savingsText =
-    evaluation.savingsFromTarget > 0
-      ? `🔥 <b>${formatBRL(evaluation.savingsFromTarget)} abaixo da sua meta!</b>`
-      : `🎯 <b>Atingiu exatamente sua meta!</b>`;
+  const isNearTarget = evaluation.isNearTarget && !evaluation.isHit;
+
+  const headerLine = isNearTarget
+    ? `⚠️ <b>QUASE NA META (Verificar cupom no checkout)</b> ${emoji}`
+    : `🚨 <b>ALERTA DE PREÇO PS5 (META ATINGIDA!)</b> ${emoji}`;
+
+  const targetComparisonText = isNearTarget
+    ? `⚠️ <b>Apenas ${formatBRL(
+        evaluation.amountAboveTarget
+      )} acima da sua meta!</b> (Teste cupons de checkout de R$ 150 a R$ 300 OFF agora!)`
+    : evaluation.savingsFromTarget > 0
+    ? `🔥 <b>${formatBRL(evaluation.savingsFromTarget)} abaixo da sua meta!</b>`
+    : `🎯 <b>Atingiu exatamente sua meta!</b>`;
 
   const verdict = evaluation.verdict || analyzeBlackFridayVerdict(offer);
   const historyLines = [
     `🕵️ <b>Termômetro Anti-Black Fraude (Buscapé 90 dias):</b>`,
     `• <b>Veredito:</b> ${verdict.badge}`,
     `• <b>Média real dos últimos 90 dias:</b> ${formatBRL(verdict.average90d)}`,
-    `• <b>Análise:</b> ${escapeHtml(verdict.explanation)}`,
+    `• <b>Análise (Preço Líquido):</b> ${escapeHtml(verdict.explanation)}`,
   ];
 
   if (verdict.trackedStats) {
@@ -125,14 +142,14 @@ export function buildOfferAlertMessage(offer, evaluation) {
   }
 
   return [
-    `🚨 <b>ALERTA DE PREÇO PS5 (EM ESTOQUE)!</b> ${emoji}`,
+    headerLine,
     ``,
     `📦 <b>${escapeHtml(offer.title)}</b>`,
     `🏷️ <b>Edição:</b> ${escapeHtml(offer.editionLabel)}`,
     `🏪 <b>Loja / Fonte:</b> ${escapeHtml(offer.store)}`,
     ``,
     formatPaymentBreakdown(offer),
-    `🎯 <b>Sua Meta:</b> ${formatBRL(evaluation.targetPrice)} (${savingsText})`,
+    `🎯 <b>Sua Meta:</b> ${formatBRL(evaluation.targetPrice)} — ${targetComparisonText}`,
     ``,
     ...historyLines,
     ``,
@@ -143,18 +160,16 @@ export function buildOfferAlertMessage(offer, evaluation) {
 }
 
 /**
- * Seleciona as melhores ofertas garantindo diversidade de lojas (Amazon, KaBuM!, Magalu, Mercado Livre, etc.)
- * para que o Resumo Diário mostre um comparativo completo entre as principais lojas confiáveis!
+ * Seleciona as melhores ofertas garantindo diversidade de lojas (Amazon, KaBuM!, Magalu, Mercado Livre, Americanas...)
  */
 function selectDiverseTopOffers(offers, edition, limit = 4) {
   const filtered = offers
     .filter((o) => o.edition === edition)
-    .sort((a, b) => a.price - b.price);
+    .sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
 
   const selected = [];
   const usedBaseStores = new Set();
 
-  // 1ª passada: pega o melhor preço de CADA loja diferente (Amazon, KaBuM, Magalu, Mercado Livre...)
   for (const offer of filtered) {
     const storeKey = (offer.baseStore || offer.store || '').split('(')[0].trim();
     if (!usedBaseStores.has(storeKey)) {
@@ -164,7 +179,6 @@ function selectDiverseTopOffers(offers, edition, limit = 4) {
     }
   }
 
-  // 2ª passada: se ainda houver vaga, completa com as próximas melhores ofertas
   for (const offer of filtered) {
     if (selected.length >= limit) break;
     if (!selected.includes(offer)) {
@@ -172,23 +186,39 @@ function selectDiverseTopOffers(offers, edition, limit = 4) {
     }
   }
 
-  return selected.sort((a, b) => a.price - b.price);
+  return selected.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
 }
 
 export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
   const topDigital = selectDiverseTopOffers(offers, 'digital', 4);
   const topDisc = selectDiverseTopOffers(offers, 'disc', 4);
 
-  const formatList = (list) => {
+  const formatList = (list, targetPrice) => {
     if (list.length === 0) return `   <i>Nenhuma oferta em estoque nesta categoria agora.</i>`;
     return list
       .map((o, idx) => {
         const pay = o.paymentInfo;
+        const effectivePrice = getEffectivePrice(o);
         const cardText =
           pay && pay.cardTotal
             ? ` | 💳 ${pay.maxInstallments}x ${formatBRL(pay.perInstallment)}`
             : '';
-        const couponText = pay?.couponCode ? ` | 🎟️ Cupom: <code>${pay.couponCode}</code>` : '';
+        const couponLine =
+          pay?.couponDiscount > 0 || pay?.couponCode
+            ? `\n      🎟️ <b>Cupom detectado:</b> -${formatBRL(
+                pay.couponDiscount || 0
+              )}${pay.couponCode ? ` (<code>${escapeHtml(pay.couponCode)}</code>)` : ''} | <b>Preço final: ${formatBRL(
+                effectivePrice
+              )}</b>`
+            : '';
+
+        const nearTargetBadge =
+          effectivePrice > targetPrice && effectivePrice <= targetPrice + (config.couponMarginTolerance || 300)
+            ? `\n      ⚠️ <b>QUASE NA META (+${formatBRL(
+                effectivePrice - targetPrice
+              )}) — Teste cupom no checkout!</b>`
+            : '';
+
         const verdict = analyzeBlackFridayVerdict(o, priceHistoryMap[o.id]);
         const shortTitle =
           o.title.length > 68 ? `${o.title.slice(0, 68).trim()}...` : o.title;
@@ -196,7 +226,7 @@ export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
         return [
           `   ${idx + 1}. 🏪 <b>${escapeHtml(o.store)}</b>`,
           `      📦 ${escapeHtml(shortTitle)}`,
-          `      💰 <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponText}`,
+          `      💰 <b>${formatBRL(o.price)} no PIX</b>${cardText}${couponLine}${nearTargetBadge}`,
           `      ${verdict.badge} — <a href="${escapeHtml(o.url)}">Abrir Anúncio Oficial</a>`,
         ].join('\n');
       })
@@ -205,15 +235,23 @@ export function buildDailySummaryMessage(offers, config, priceHistoryMap = {}) {
 
   return [
     `📊 <b>COMPARATIVO DAS PRINCIPAIS LOJAS (OFICIAIS & BEM AVALIADOS)</b>`,
-    `<i>Apenas anúncios oficiais verificados, em estoque e com avaliações reais:</i>`,
+    `<i>Preços líquidos já considerando cupons na página e filtro Anti-Black Fraude:</i>`,
     ``,
-    `🎮 <b>PS5 Slim Digital — Principais Lojas (Meta: ${formatBRL(config.targetPriceDigital)} | Média 90d: R$ 3.749):</b>`,
-    formatList(topDigital),
+    `🎮 <b>PS5 Slim Digital — Principais Lojas (Meta: ${formatBRL(
+      config.targetPriceDigital
+    )} | Margem Cupom: até ${formatBRL(
+      config.targetPriceDigital + (config.couponMarginTolerance || 300)
+    )}):</b>`,
+    formatList(topDigital, config.targetPriceDigital),
     ``,
-    `💿 <b>PS5 Slim Com Leitor de Disco — Principais Lojas (Meta: ${formatBRL(config.targetPriceDisc)} | Média 90d: R$ 4.049):</b>`,
-    formatList(topDisc),
+    `💿 <b>PS5 Slim Com Leitor de Disco — Principais Lojas (Meta: ${formatBRL(
+      config.targetPriceDisc
+    )} | Margem Cupom: até ${formatBRL(
+      config.targetPriceDisc + (config.couponMarginTolerance || 300)
+    )}):</b>`,
+    formatList(topDisc, config.targetPriceDisc),
     ``,
-    `🔕 <i>Modo Silencioso Ativo: o robô só manda alerta fora do resumo diário quando um preço cair ou atingir sua meta!</i>`,
+    `🔕 <i>Alertas automáticos disparam quando atingir a Meta ou entrar na Margem para Cupom (até +R$ 300)!</i>`,
   ].join('\n');
 }
 

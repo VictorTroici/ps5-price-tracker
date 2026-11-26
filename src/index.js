@@ -1,5 +1,5 @@
 import { getConfig, updateEnvValues } from './config.js';
-import { evaluateTargetHit } from './classifier.js';
+import { evaluateTargetHit, getEffectivePrice } from './classifier.js';
 import { scanAllStores } from './scrapers.js';
 import { loadState, saveState, updateOfferPriceHistory } from './store.js';
 import {
@@ -34,6 +34,70 @@ function getBrasiliaDateParts() {
   };
 }
 
+/**
+ * Gera chave de deduplicação por Loja + Modelo/Edição + ID da oferta
+ * E verifica se deve enviar alerta (somente se o preço final líquido caiu ou se apareceu um cupom novo!)
+ */
+export function shouldTriggerDedupedAlert(offer, evaluation, notifiedPricesMap = {}, minDrop = 1) {
+  if (!evaluation.shouldAlert) return false;
+
+  const effectivePrice = getEffectivePrice(offer);
+  const couponSignature =
+    offer.paymentInfo?.couponCode ||
+    (offer.paymentInfo?.couponDiscount > 0 ? `DESC-${offer.paymentInfo.couponDiscount}` : 'NO_COUPON');
+
+  // Chave por oferta individual e por Loja+Edição para evitar flood do mesmo modelo na mesma loja
+  const storeModelKey = `storemodel:${(offer.baseStore || offer.store).toLowerCase()}:${offer.edition}`;
+  const prevRecordRaw = notifiedPricesMap[offer.id] ?? notifiedPricesMap[storeModelKey];
+
+  if (prevRecordRaw === undefined || prevRecordRaw === null) {
+    return true;
+  }
+
+  // Suporta formato legado (number) e novo formato estruturado ({ effectivePrice, couponSignature })
+  const prevEffectivePrice =
+    typeof prevRecordRaw === 'number'
+      ? prevRecordRaw
+      : Number(prevRecordRaw.effectivePrice ?? Infinity);
+  const prevCouponSig =
+    typeof prevRecordRaw === 'object' && prevRecordRaw.couponSignature
+      ? prevRecordRaw.couponSignature
+      : 'NO_COUPON';
+
+  // 1) Se o preço final líquido caiu pelo menos minDrop em relação ao último alerta
+  if (effectivePrice <= prevEffectivePrice - minDrop) {
+    return true;
+  }
+
+  // 2) Se apareceu um cupom novo que não existia no alerta anterior (e o preço não subiu)
+  if (
+    couponSignature !== 'NO_COUPON' &&
+    couponSignature !== prevCouponSig &&
+    effectivePrice <= prevEffectivePrice
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+export function recordNotifiedOffer(offer, notifiedPricesMap) {
+  const effectivePrice = getEffectivePrice(offer);
+  const couponSignature =
+    offer.paymentInfo?.couponCode ||
+    (offer.paymentInfo?.couponDiscount > 0 ? `DESC-${offer.paymentInfo.couponDiscount}` : 'NO_COUPON');
+  const record = {
+    effectivePrice,
+    pixPrice: offer.price,
+    couponSignature,
+    notifiedAt: new Date().toISOString(),
+  };
+
+  const storeModelKey = `storemodel:${(offer.baseStore || offer.store).toLowerCase()}:${offer.edition}`;
+  notifiedPricesMap[offer.id] = record;
+  notifiedPricesMap[storeModelKey] = record;
+}
+
 export async function runScanAndNotify() {
   if (isScanning) {
     return { skipped: true, offersCount: currentState.offers.length };
@@ -42,15 +106,18 @@ export async function runScanAndNotify() {
 
   try {
     const config = getConfig();
+    const marginTol = config.couponMarginTolerance || 300;
     console.log(
-      `\n🔎 [${new Date().toLocaleTimeString('pt-BR')}] Iniciando varredura completa de preços do PS5 Slim...`
+      `\n🔎 [${new Date().toLocaleTimeString('pt-BR')}] Iniciando varredura Black Friday PS5 Slim...`
     );
     console.log(
       `   🎯 Metas -> Digital: ${formatBRL(
         config.targetPriceDigital
-      )} | Com Disco: ${formatBRL(config.targetPriceDisc)} | Variação mín.: ${formatBRL(
-        config.minPriceDropReais
-      )}`
+      )} (Margem Cupom: até ${formatBRL(
+        config.targetPriceDigital + marginTol
+      )}) | Com Disco: ${formatBRL(
+        config.targetPriceDisc
+      )} (Margem Cupom: até ${formatBRL(config.targetPriceDisc + marginTol)})`
     );
 
     const { offers, sourceStatus, scannedAt } = await scanAllStores(
@@ -64,30 +131,41 @@ export async function runScanAndNotify() {
     updateOfferPriceHistory(currentState, offers);
 
     let alertsTriggered = 0;
-    const minDrop = config.minPriceDropReais || 50;
 
     for (const offer of offers) {
       const evaluation = evaluateTargetHit(offer, config, currentState.priceHistory);
-      const statusIcon = evaluation.isHit ? '🔥 [META ATINGIDA]' : '  ';
+      const effectivePrice = evaluation.effectivePrice;
+      const statusIcon = evaluation.isHit
+        ? '🔥 [META ATINGIDA]'
+        : evaluation.isNearTarget
+        ? '⚠️ [QUASE NA META - MARGEM CUPOM]'
+        : '  ';
+
       const pay = offer.paymentInfo;
+      const couponLog =
+        pay?.couponDiscount > 0 || pay?.couponCode
+          ? ` | 🎟️ Cupom: -${formatBRL(pay.couponDiscount || 0)} -> Final: ${formatBRL(
+              effectivePrice
+            )}`
+          : '';
       const cardLog =
         pay && pay.cardTotal
-          ? ` | Cartão: ${pay.maxInstallments}x ${formatBRL(pay.perInstallment)} (${formatBRL(
-              pay.cardTotal
-            )})`
+          ? ` | Cartão: ${pay.maxInstallments}x ${formatBRL(pay.perInstallment)}`
           : '';
-      const couponLog = pay?.couponCode ? ` | CUPOM: ${pay.couponCode}` : '';
 
       console.log(
-        `   ${statusIcon} [${offer.store}] ${offer.editionLabel} -> PIX: ${formatBRL(
+        `   ${statusIcon} [${offer.baseStore || offer.store}] ${offer.editionLabel} -> PIX: ${formatBRL(
           offer.price
-        )}${cardLog}${couponLog} (${offer.title.slice(0, 50)}...)`
+        )}${couponLog}${cardLog} (${offer.title.slice(0, 48)}...)`
       );
 
-      if (evaluation.isHit) {
-        const prevNotifiedPrice = currentState.notifiedPrices[offer.id];
-        const shouldNotify =
-          prevNotifiedPrice === undefined || offer.price <= prevNotifiedPrice - minDrop;
+      if (evaluation.shouldAlert) {
+        const shouldNotify = shouldTriggerDedupedAlert(
+          offer,
+          evaluation,
+          currentState.notifiedPrices,
+          1
+        );
 
         if (shouldNotify) {
           if (config.telegramBotToken) {
@@ -99,20 +177,22 @@ export async function runScanAndNotify() {
             );
             if (tgRes.ok) {
               alertsTriggered++;
-              currentState.notifiedPrices[offer.id] = offer.price;
+              recordNotifiedOffer(offer, currentState.notifiedPrices);
               currentState.alertHistory.unshift({
                 offerId: offer.id,
                 store: offer.store,
                 title: offer.title,
                 price: offer.price,
+                preco_final_efetivo: effectivePrice,
+                alertType: evaluation.alertType,
                 editionLabel: offer.editionLabel,
                 url: offer.url,
                 alertedAt: new Date().toISOString(),
               });
               console.log(
-                `   ✈️ Alerta enviado no Telegram para: ${offer.title} (${formatBRL(
-                  offer.price
-                )})`
+                `   ✈️ Alerta (${evaluation.alertType}) enviado no Telegram: ${
+                  offer.title
+                } (Final: ${formatBRL(effectivePrice)})`
               );
             } else {
               console.warn(`   ⚠️ Falha ao enviar Telegram: ${tgRes.error}`);
@@ -142,7 +222,7 @@ export async function runScanAndNotify() {
     }
 
     console.log(
-      `✅ Varredura concluída: ${offers.length} ofertas em estoque analisadas | ${alertsTriggered} alertas enviados.`
+      `✅ Varredura concluída: ${offers.length} ofertas analisadas | ${alertsTriggered} novos alertas enviados.`
     );
 
     saveState(currentState);
@@ -157,10 +237,7 @@ export async function runScanAndNotify() {
 }
 
 /**
- * Escuta comandos enviados pelo usuário diretamente no bot do Telegram.
- * IMPORTANTE: Salva o lastTelegramUpdateId no state.json e confirma o offset na API do Telegram!
- * Sem isso, quando roda no GitHub Actions a cada 10 min, o Telegram devolvia o mesmo /buscar antigo
- * em toda execução, causando mensagens repetidas da KaBuM!
+ * Escuta comandos enviados pelo usuário diretamente no bot do Telegram
  */
 async function pollTelegramCommands() {
   const config = getConfig();
@@ -174,7 +251,6 @@ async function pollTelegramCommands() {
     const data = await res.json();
     if (!data.ok || !Array.isArray(data.result) || data.result.length === 0) return;
 
-    // Pega apenas a última mensagem enviada nas últimas 2 horas (evita reprocessar fila velha)
     let latestUpdate = null;
     for (const update of data.result) {
       if (update.update_id > (currentState.lastTelegramUpdateId || 0)) {
@@ -183,8 +259,6 @@ async function pollTelegramCommands() {
       latestUpdate = update;
     }
 
-    // Confirma imediatamente na API do Telegram que já lemos até currentState.lastTelegramUpdateId
-    // Assim o próprio servidor do Telegram limpa a fila mesmo antes do git push!
     await fetch(
       `https://api.telegram.org/bot${config.telegramBotToken}/getUpdates?offset=${
         currentState.lastTelegramUpdateId + 1
@@ -198,10 +272,7 @@ async function pollTelegramCommands() {
 
     const msg = latestUpdate.message;
     const msgAgeSeconds = Math.floor(Date.now() / 1000) - Number(msg.date || 0);
-    // Se a mensagem tiver mais de 15 minutos, apenas consome o offset sem responder de novo
-    if (msgAgeSeconds > 900) {
-      return;
-    }
+    if (msgAgeSeconds > 900) return;
 
     const chatId = msg?.chat?.id ? String(msg.chat.id) : '';
     const text = (msg?.text || '').trim();
@@ -214,17 +285,7 @@ async function pollTelegramCommands() {
 
     const lower = text.toLowerCase();
 
-    if (lower === '/start' || lower === 'oi' || lower === '/status') {
-      if (currentState.offers.length === 0) {
-        await runScanAndNotify();
-      }
-      const summaryMsg = buildDailySummaryMessage(
-        currentState.offers,
-        config,
-        currentState.priceHistory
-      );
-      await sendTelegramMessage(config.telegramBotToken, chatId, summaryMsg);
-    } else if (lower === '/resumo') {
+    if (lower === '/start' || lower === 'oi' || lower === '/status' || lower === '/resumo') {
       if (currentState.offers.length === 0) {
         await runScanAndNotify();
       }
@@ -238,7 +299,7 @@ async function pollTelegramCommands() {
       await sendTelegramMessage(
         config.telegramBotToken,
         chatId,
-        `🔎 <b>Varrendo Amazon, KaBuM!, Magalu, Mercado Livre, Pelando e Promobit agora...</b>`
+        `🔎 <b>Varrendo Amazon, KaBuM!, Magalu, Americanas e Comparadores agora...</b>`
       );
       await runScanAndNotify();
       const summaryMsg = buildDailySummaryMessage(
@@ -276,13 +337,41 @@ async function pollTelegramCommands() {
   }
 }
 
+/**
+ * Agenda o próximo ciclo com intervalo base de 3 minutos + Jitter aleatório de 10 a 30 segundos
+ */
+function scheduleNextScanWithJitter(config) {
+  const baseMs = Math.max(1, config.checkIntervalMinutes || 3) * 60 * 1000;
+  const minJitterMs = (config.jitterMinSeconds ?? 10) * 1000;
+  const maxJitterMs = (config.jitterMaxSeconds ?? 30) * 1000;
+  const jitterMs = Math.floor(minJitterMs + Math.random() * (maxJitterMs - minJitterMs + 1));
+  const totalWaitMs = baseMs + jitterMs;
+
+  console.log(
+    `⏱️ Próxima varredura agendada em ${(totalWaitMs / 1000).toFixed(0)}s (${
+      config.checkIntervalMinutes || 3
+    } min + ${(jitterMs / 1000).toFixed(0)}s de jitter anti-bot)...`
+  );
+
+  setTimeout(async () => {
+    await runScanAndNotify().catch((err) =>
+      console.error('Erro no ciclo de monitoramento:', err.message)
+    );
+    scheduleNextScanWithJitter(getConfig());
+  }, totalWaitMs);
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const config = getConfig();
 
   if (args.includes('--send-summary')) {
     await runScanAndNotify();
-    const summaryMsg = buildDailySummaryMessage(currentState.offers, config);
+    const summaryMsg = buildDailySummaryMessage(
+      currentState.offers,
+      config,
+      currentState.priceHistory
+    );
     await sendTelegramMessage(config.telegramBotToken, config.telegramChatId, summaryMsg);
     return;
   }
@@ -312,15 +401,17 @@ async function main() {
     pollTelegramCommands();
   }, 5000);
 
-  const intervalMs = Math.max(1, config.checkIntervalMinutes || 10) * 60 * 1000;
-  setInterval(() => {
-    runScanAndNotify().catch((err) =>
-      console.error('Erro no ciclo de monitoramento:', err.message)
-    );
-  }, intervalMs);
+  scheduleNextScanWithJitter(config);
 }
 
-main().catch((err) => {
-  console.error('Erro fatal:', err);
-  process.exit(1);
-});
+import { fileURLToPath } from 'node:url';
+
+const isDirectRun =
+  process.argv[1] && fileURLToPath(import.meta.url).toLowerCase() === process.argv[1].toLowerCase();
+
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error('Erro fatal:', err);
+    process.exit(1);
+  });
+}
