@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-25T23:55:22.154Z",
+  "lastScanAt": "2026-11-26T00:00:30.218Z",
   "lastTelegramUpdateId": 93445338,
   "lastDailySummarySlot": "2026-11-25-20h",
   "offers": [
@@ -26,7 +26,7 @@
         "cashbackInfo": null
       },
       "sourceType": "custom_url",
-      "checkedAt": "2026-11-25T23:55:18.224Z"
+      "checkedAt": "2026-11-26T00:00:28.898Z"
     },
     {
       "id": "kabum-slim-disc-1tb",
@@ -51,7 +51,7 @@
         "cashbackInfo": null
       },
       "sourceType": "custom_url",
-      "checkedAt": "2026-11-25T23:55:18.266Z"
+      "checkedAt": "2026-11-26T00:00:28.923Z"
     },
     {
       "id": "kabum-636960",
@@ -73,7 +73,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-25T23:55:18.124Z"
+      "checkedAt": "2026-11-26T00:00:28.590Z"
     }
   ],
   "notifiedPrices": {
@@ -99,21 +99,21 @@
       "maxPrice": 7999,
       "lastPrice": 7999,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-25T23:55:22.154Z"
+      "updatedAt": "2026-11-26T00:00:30.218Z"
     },
     "kabum-slim-digital-825": {
       "minPrice": 4369.05,
       "maxPrice": 4369.05,
       "lastPrice": 4369.05,
       "firstSeenAt": "2026-11-25T20:55:20.054Z",
-      "updatedAt": "2026-11-25T23:55:22.154Z"
+      "updatedAt": "2026-11-26T00:00:30.218Z"
     },
     "kabum-slim-disc-1tb": {
       "minPrice": 4749.05,
       "maxPrice": 4749.05,
       "lastPrice": 4749.05,
       "firstSeenAt": "2026-11-25T20:55:20.054Z",
-      "updatedAt": "2026-11-25T23:55:22.154Z"
+      "updatedAt": "2026-11-26T00:00:30.218Z"
     }
   },
   "alertHistory": [
