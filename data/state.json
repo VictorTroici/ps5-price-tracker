@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-27T12:46:20.199Z",
+  "lastScanAt": "2026-11-27T12:48:21.851Z",
   "lastTelegramUpdateId": 93445348,
   "lastDailySummarySlot": "2026-11-26-20h",
   "offers": [
@@ -30,7 +30,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:18.326Z"
+      "checkedAt": "2026-11-27T12:48:18.628Z"
     },
     {
       "id": "catalog-kabum!-1574164149",
@@ -59,7 +59,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:19.735Z"
+      "checkedAt": "2026-11-27T12:48:20.832Z"
     },
     {
       "id": "catalog-amazonbrasil-1513669583",
@@ -88,7 +88,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:17.559Z"
+      "checkedAt": "2026-11-27T12:48:18.033Z"
     },
     {
       "id": "kabum-slim-digital-825",
@@ -117,7 +117,7 @@
         "cashbackInfo": null
       },
       "sourceType": "custom_url",
-      "checkedAt": "2026-11-27T12:46:16.841Z"
+      "checkedAt": "2026-11-27T12:48:17.385Z"
     },
     {
       "id": "catalog-kabum!-1547454661",
@@ -146,7 +146,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:18.326Z"
+      "checkedAt": "2026-11-27T12:48:18.629Z"
     },
     {
       "id": "catalog-amazonbrasil-1524764018",
@@ -175,7 +175,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:18.326Z"
+      "checkedAt": "2026-11-27T12:48:18.629Z"
     },
     {
       "id": "catalog-americanas-1539565754",
@@ -204,7 +204,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:18.326Z"
+      "checkedAt": "2026-11-27T12:48:18.629Z"
     },
     {
       "id": "catalog-amazonbrasil-1550912550",
@@ -233,7 +233,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:18.726Z"
+      "checkedAt": "2026-11-27T12:48:19.177Z"
     },
     {
       "id": "kabum-slim-disc-1tb",
@@ -262,7 +262,7 @@
         "cashbackInfo": null
       },
       "sourceType": "custom_url",
-      "checkedAt": "2026-11-27T12:46:16.788Z"
+      "checkedAt": "2026-11-27T12:48:17.362Z"
     },
     {
       "id": "catalog-kabum!-1530728279",
@@ -291,7 +291,36 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:17.559Z"
+      "checkedAt": "2026-11-27T12:48:18.033Z"
+    },
+    {
+      "id": "catalog-amazonbrasil-1524262412",
+      "store": "Amazon Brasil (⭐ 4.9 | Loja Verificada via Buscapé)",
+      "baseStore": "Amazon Brasil",
+      "title": "PlayStation 5 Standard (Slim)",
+      "price": 5319.9,
+      "preco_final_efetivo": 5319.9,
+      "edition": "digital",
+      "editionLabel": "PS5 Slim Digital (Sem Disco)",
+      "url": "https://www.buscape.com.br/console-de-video-game/pre-venda-console-playstation-5-slim-1-tb-sony-1214a-4k?highlightedItemId=1524262412",
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "paymentInfo": {
+        "pixPrice": 5319.9,
+        "preco_final_efetivo": 5319.9,
+        "couponDiscount": 0,
+        "couponCode": null,
+        "couponLabel": null,
+        "cardTotal": 5319.9,
+        "maxInstallments": 10,
+        "perInstallment": 531.99,
+        "hasPixDiscount": false,
+        "paymentMethodLabel": "À vista ou Parcelado",
+        "cashbackInfo": null
+      },
+      "sourceType": "multi_store_catalog",
+      "checkedAt": "2026-11-27T12:48:19.974Z"
     },
     {
       "id": "catalog-magazineluiza-1574463275",
@@ -320,36 +349,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:19.735Z"
-    },
-    {
-      "id": "catalog-amazonbrasil-1524262412",
-      "store": "Amazon Brasil (⭐ 4.9 | Loja Verificada via Buscapé)",
-      "baseStore": "Amazon Brasil",
-      "title": "PlayStation 5 Standard (Slim)",
-      "price": 5599.9,
-      "preco_final_efetivo": 5599.9,
-      "edition": "digital",
-      "editionLabel": "PS5 Slim Digital (Sem Disco)",
-      "url": "https://www.buscape.com.br/console-de-video-game/pre-venda-console-playstation-5-slim-1-tb-sony-1214a-4k?highlightedItemId=1524262412",
-      "inStock": true,
-      "rating": 4.9,
-      "reviewsCount": 1200,
-      "paymentInfo": {
-        "pixPrice": 5599.9,
-        "preco_final_efetivo": 5599.9,
-        "couponDiscount": 0,
-        "couponCode": null,
-        "couponLabel": null,
-        "cardTotal": 5599.9,
-        "maxInstallments": 10,
-        "perInstallment": 559.99,
-        "hasPixDiscount": false,
-        "paymentMethodLabel": "À vista ou Parcelado",
-        "cashbackInfo": null
-      },
-      "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:19.231Z"
+      "checkedAt": "2026-11-27T12:48:20.832Z"
     },
     {
       "id": "catalog-amazonbrasil-1535140318",
@@ -378,7 +378,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:20.198Z"
+      "checkedAt": "2026-11-27T12:48:21.850Z"
     },
     {
       "id": "catalog-magazineluiza-1530803278",
@@ -407,7 +407,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-27T12:46:17.559Z"
+      "checkedAt": "2026-11-27T12:48:18.034Z"
     },
     {
       "id": "kabum-636960",
@@ -436,7 +436,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-27T12:46:16.920Z"
+      "checkedAt": "2026-11-27T12:48:17.442Z"
     }
   ],
   "notifiedPrices": {
@@ -486,63 +486,63 @@
       "maxPrice": 7999,
       "lastPrice": 7999,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "kabum-slim-digital-825": {
       "minPrice": 4369.05,
       "maxPrice": 4649.07,
       "lastPrice": 4499,
       "firstSeenAt": "2026-11-25T20:55:20.054Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "kabum-slim-disc-1tb": {
       "minPrice": 4749.05,
       "maxPrice": 4999,
       "lastPrice": 4999,
       "firstSeenAt": "2026-11-25T20:55:20.054Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-kabum!-1547454661": {
       "minPrice": 4369.05,
       "maxPrice": 4649.07,
       "lastPrice": 4499,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-kabum!-1574164149": {
       "minPrice": 4370.07,
       "maxPrice": 4370.07,
       "lastPrice": 4370.07,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-amazonbrasil-1524764018": {
       "minPrice": 4369.04,
       "maxPrice": 4599,
       "lastPrice": 4599,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-magazineluiza-1547894141": {
       "minPrice": 4299,
       "maxPrice": 4654.19,
       "lastPrice": 4355.02,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-americanas-1539565754": {
       "minPrice": 4655.99,
       "maxPrice": 4655.99,
       "lastPrice": 4655.99,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-amazonbrasil-1513669583": {
       "minPrice": 4419,
       "maxPrice": 4999,
       "lastPrice": 4419,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-amazonbrasil-1247507824": {
       "minPrice": 4364.9,
@@ -556,28 +556,28 @@
       "maxPrice": 4999,
       "lastPrice": 4999,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-amazonbrasil-1550912550": {
       "minPrice": 4987.5,
       "maxPrice": 4987.5,
       "lastPrice": 4987.5,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-amazonbrasil-1535140318": {
       "minPrice": 5299.9,
       "maxPrice": 5599.9,
       "lastPrice": 5599.9,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-magazineluiza-1530803278": {
       "minPrice": 5748.85,
       "maxPrice": 5748.85,
       "lastPrice": 5748.85,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "amz-B0FPGF9J2J": {
       "minPrice": 3999.9,
@@ -668,7 +668,7 @@
       "maxPrice": 5403.85,
       "lastPrice": 5403.85,
       "firstSeenAt": "2026-11-26T03:20:18.943Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     },
     "catalog-magazineluiza-1559548735": {
       "minPrice": 4475.8,
@@ -722,9 +722,9 @@
     "catalog-amazonbrasil-1524262412": {
       "minPrice": 5319.9,
       "maxPrice": 5599.9,
-      "lastPrice": 5599.9,
+      "lastPrice": 5319.9,
       "firstSeenAt": "2026-11-26T23:58:19.179Z",
-      "updatedAt": "2026-11-27T12:46:20.199Z"
+      "updatedAt": "2026-11-27T12:48:21.851Z"
     }
   },
   "alertHistory": [
