@@ -1,5 +1,5 @@
 {
-  "lastScanAt": "2026-11-28T11:26:20.407Z",
+  "lastScanAt": "2026-11-28T11:28:23.378Z",
   "lastTelegramUpdateId": 93445348,
   "lastDailySummarySlot": "2026-11-27-20h",
   "offers": [
@@ -30,7 +30,7 @@
         "cashbackInfo": null
       },
       "sourceType": "custom_url",
-      "checkedAt": "2026-11-28T11:26:16.550Z"
+      "checkedAt": "2026-11-28T11:28:15.996Z"
     },
     {
       "id": "catalog-kabum!-1547454661",
@@ -59,7 +59,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:17.752Z"
+      "checkedAt": "2026-11-28T11:28:16.911Z"
     },
     {
       "id": "catalog-amazonbrasil-1524764018",
@@ -88,7 +88,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:17.752Z"
+      "checkedAt": "2026-11-28T11:28:16.912Z"
     },
     {
       "id": "catalog-kabum!-1574164149",
@@ -117,7 +117,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:19.668Z"
+      "checkedAt": "2026-11-28T11:28:18.735Z"
     },
     {
       "id": "kabum-slim-disc-1tb",
@@ -146,7 +146,7 @@
         "cashbackInfo": null
       },
       "sourceType": "custom_url",
-      "checkedAt": "2026-11-28T11:26:16.608Z"
+      "checkedAt": "2026-11-28T11:28:15.961Z"
     },
     {
       "id": "catalog-kabum!-1530728279",
@@ -175,7 +175,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:17.083Z"
+      "checkedAt": "2026-11-28T11:28:16.508Z"
     },
     {
       "id": "catalog-amazonbrasil-1513669583",
@@ -204,7 +204,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:17.083Z"
+      "checkedAt": "2026-11-28T11:28:16.508Z"
     },
     {
       "id": "catalog-amazonbrasil-1550912550",
@@ -233,7 +233,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:18.260Z"
+      "checkedAt": "2026-11-28T11:28:17.441Z"
     },
     {
       "id": "catalog-amazonbrasil-1276737335",
@@ -262,7 +262,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:20.406Z"
+      "checkedAt": "2026-11-28T11:28:19.213Z"
     },
     {
       "id": "catalog-magazineluiza-1530803278",
@@ -291,7 +291,7 @@
         "cashbackInfo": null
       },
       "sourceType": "multi_store_catalog",
-      "checkedAt": "2026-11-28T11:26:17.083Z"
+      "checkedAt": "2026-11-28T11:28:16.508Z"
     },
     {
       "id": "kabum-636960",
@@ -320,7 +320,7 @@
         "cashbackInfo": null
       },
       "sourceType": "next_data",
-      "checkedAt": "2026-11-28T11:26:16.937Z"
+      "checkedAt": "2026-11-28T11:28:16.061Z"
     }
   ],
   "notifiedPrices": {
@@ -370,42 +370,42 @@
       "maxPrice": 7999,
       "lastPrice": 7999,
       "firstSeenAt": "2026-11-25T01:15:21.859Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "kabum-slim-digital-825": {
       "minPrice": 4274.05,
       "maxPrice": 4649.07,
       "lastPrice": 4299,
       "firstSeenAt": "2026-11-25T20:55:20.054Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "kabum-slim-disc-1tb": {
       "minPrice": 4399,
       "maxPrice": 5114.07,
       "lastPrice": 4729,
       "firstSeenAt": "2026-11-25T20:55:20.054Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-kabum!-1547454661": {
       "minPrice": 4274.05,
       "maxPrice": 4649.07,
       "lastPrice": 4299,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-kabum!-1574164149": {
       "minPrice": 4370.07,
       "maxPrice": 4370.07,
       "lastPrice": 4370.07,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-amazonbrasil-1524764018": {
       "minPrice": 3999.8999999999996,
       "maxPrice": 4599,
       "lastPrice": 4299,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-magazineluiza-1547894141": {
       "minPrice": 4151.74,
@@ -426,7 +426,7 @@
       "maxPrice": 5099.9,
       "lastPrice": 4729,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-amazonbrasil-1247507824": {
       "minPrice": 4364.9,
@@ -440,14 +440,14 @@
       "maxPrice": 4999,
       "lastPrice": 4729,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-amazonbrasil-1550912550": {
       "minPrice": 4987.5,
       "maxPrice": 5319.9,
       "lastPrice": 5319.9,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-amazonbrasil-1535140318": {
       "minPrice": 5299.9,
@@ -461,7 +461,7 @@
       "maxPrice": 5748.85,
       "lastPrice": 5438.35,
       "firstSeenAt": "2026-11-26T03:10:22.909Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "amz-B0FPGF9J2J": {
       "minPrice": 3999.9,
@@ -566,7 +566,7 @@
       "maxPrice": 5599.9,
       "lastPrice": 5319.9,
       "firstSeenAt": "2026-11-26T04:02:29.124Z",
-      "updatedAt": "2026-11-28T11:26:20.407Z"
+      "updatedAt": "2026-11-28T11:28:23.379Z"
     },
     "catalog-amazonbrasil-1238408374": {
       "minPrice": 4364.9,
